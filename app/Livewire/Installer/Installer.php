@@ -54,6 +54,10 @@ class Installer extends Component {
     protected $listeners = ['runMigrations'];
 
     public function mount() {
+        // Make sure Laravel's expected runtime directories exist before we do
+        // anything else. On shared hosting these often go missing after a zip
+        // upload because empty dirs aren't preserved.
+        self::ensureRuntimeDirectories();
         $this->state['db'] = [
             'host' => env('DB_HOST'),
             'port' => env('DB_PORT'),
@@ -62,6 +66,39 @@ class Installer extends Component {
             'username' => env('DB_USERNAME'),
             'password' => env('DB_PASSWORD')
         ];
+    }
+
+    /**
+     * Recreate Laravel runtime directories that are required for the app
+     * to boot at all (storage/framework/views, bootstrap/cache, etc.).
+     *
+     * Static so it can also be called from a tiny bootstrap script when the
+     * full app cannot boot because of a missing dir.
+     */
+    public static function ensureRuntimeDirectories(): array {
+        $dirs = [
+            storage_path('framework'),
+            storage_path('framework/cache'),
+            storage_path('framework/cache/data'),
+            storage_path('framework/sessions'),
+            storage_path('framework/testing'),
+            storage_path('framework/views'),
+            storage_path('logs'),
+            storage_path('app'),
+            storage_path('app/public'),
+            storage_path('app/private'),
+            base_path('bootstrap/cache'),
+        ];
+        $created = [];
+        foreach ($dirs as $d) {
+            if (!is_dir($d)) {
+                if (@mkdir($d, 0775, true)) {
+                    $created[] = $d;
+                }
+            }
+            @chmod($d, 0775);
+        }
+        return $created;
     }
 
     public function add($type = 'domains') {
@@ -230,17 +267,27 @@ class Installer extends Component {
             'detail' => $installedFlag
         ];
 
-        // 3. Storage directories writable (logs, framework, app)
+        // 3. Storage directories exist + writable
         $storageDirs = [
             storage_path('logs'),
             storage_path('framework'),
+            storage_path('framework/cache'),
+            storage_path('framework/sessions'),
+            storage_path('framework/views'),
             storage_path('app'),
+            base_path('bootstrap/cache'),
         ];
-        $unwritable = array_filter($storageDirs, fn($d) => !is_writable($d));
+        $missing = array_filter($storageDirs, fn($d) => !is_dir($d));
+        $unwritable = array_filter($storageDirs, fn($d) => is_dir($d) && !is_writable($d));
         $checks[] = [
-            'name' => 'Storage directories writable',
-            'ok' => empty($unwritable),
-            'detail' => empty($unwritable) ? 'logs, framework, app all writable' : 'Not writable: ' . implode(', ', $unwritable)
+            'name' => 'Storage directories exist and writable',
+            'ok' => empty($missing) && empty($unwritable),
+            'detail' => (empty($missing) && empty($unwritable))
+                ? 'storage/framework/{cache,sessions,views}, storage/{logs,app}, bootstrap/cache all OK'
+                : trim(
+                    (empty($missing) ? '' : 'Missing: ' . implode(', ', $missing) . '. ')
+                    . (empty($unwritable) ? '' : 'Not writable: ' . implode(', ', $unwritable))
+                )
         ];
 
         // 4. Pre-built front-end assets present (public/build/manifest.json)
@@ -276,6 +323,9 @@ class Installer extends Component {
 
     public function runMigrations() {
         try {
+            // Make sure storage/framework/views etc. exist before any artisan call.
+            self::ensureRuntimeDirectories();
+
             // Clear config/cache so the .env values just written take effect
             Artisan::call('config:clear');
             Artisan::call('cache:clear');

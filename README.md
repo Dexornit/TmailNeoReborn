@@ -143,12 +143,45 @@ rm storage/installed
 
 | Symptom | Fix |
 |---------|-----|
+| `InvalidArgumentException: Please provide a valid cache path.` | A required runtime directory is missing — typically `storage/framework/views/`. Log in as admin → `Maintenance` → **Repair Storage Directories**. If you cannot reach the admin page because of this same error, drop the [emergency `fix.php` script](#emergency-fix-script) into `public/`, hit it once, then delete it. |
 | `SQLSTATE[HY000] [2002]` on `php artisan migrate` (Windows dev) | MySQL is not running. Switch to SQLite (see *Local development*) or start your MySQL service. |
 | `Vite manifest not found at: …/public/build/manifest.json` | The `public/build/` directory wasn't uploaded. Re-zip including `public/build/**` (it is committed to this repo). |
 | `403 Forbidden` on `/admin/emails` | Logged-in user is not an admin (`role != 7`). Promote via the users table or via the maintenance shell. |
 | Caches show stale settings after `.env` edit | Log in as admin → `Maintenance` → **Clear All Caches**. |
 | Storage uploads return 404 | Log in as admin → `Maintenance` → **Recreate Storage Symlink**. |
 | Want to re-run the installer | Delete `storage/installed` and re-open `/installer`. |
+
+### Emergency `fix.php` script
+
+If the app refuses to render at all (e.g. `Please provide a valid cache path`),
+upload the following file as `public/fix.php`, visit it once in a browser, then
+**delete it** (do not leave it on the server):
+
+```php
+<?php
+// public/fix.php — visit once, then DELETE THIS FILE
+
+$base = dirname(__DIR__);
+$dirs = [
+    "$base/storage/framework/cache/data",
+    "$base/storage/framework/sessions",
+    "$base/storage/framework/testing",
+    "$base/storage/framework/views",
+    "$base/storage/logs",
+    "$base/storage/app/public",
+    "$base/bootstrap/cache",
+];
+foreach ($dirs as $d) {
+    if (!is_dir($d)) {
+        echo (@mkdir($d, 0775, true) ? "Created: " : "FAILED: ") . $d . "<br>";
+    }
+    @chmod($d, 0775);
+}
+foreach (['config.php', 'services.php', 'packages.php', 'routes-v7.php', 'events.php'] as $f) {
+    @unlink("$base/bootstrap/cache/$f");
+}
+echo "<br><b>Done.</b> Refresh the site, then DELETE public/fix.php.";
+```
 
 ---
 
