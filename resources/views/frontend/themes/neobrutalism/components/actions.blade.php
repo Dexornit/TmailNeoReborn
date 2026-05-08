@@ -1,78 +1,91 @@
 <div x-data="{ in_app: {{ $in_app ? 'true' : 'false' }} }">
-    <div>
-        {{-- ═══════════ GUEST: EMAIL INPUT (no session email yet) ═══════════ --}}
-        @if ($isGuest && ! $hasEmail)
-            <div class="guest-actions mt-4 px-6">
-                <form wire:submit.prevent="openInbox" class="neo-guest-form">
-                    <div class="neo-card p-5 md:p-6 relative">
-                        <div class="neo-star absolute -top-4 -left-4 w-8 h-8 z-10"></div>
+    <div class="neo-actions mt-4 px-4 md:px-6">
+        {{-- ═══════════════ MAILBOX BAR (always rendered) ═══════════════
+             A single card containing:
+               - Email input (user can change it freely)
+               - Open Inbox button (validate + sync into App + fetchMessages)
+               - Copy / Refresh buttons below (and New / Delete for logged-in)
+        --}}
+        <form wire:submit.prevent="openInbox" class="neo-mailbox-bar">
+            <div class="neo-card p-5 md:p-6 relative">
+                <div class="neo-star absolute -top-4 -left-4 w-8 h-8 z-10"></div>
 
-                        <label for="emailInput" class="block text-xs font-black uppercase tracking-wide mb-2">
-                            {{ __('Enter your email address') }}
-                        </label>
-                        <div class="flex flex-col md:flex-row gap-3">
-                            <input
-                                id="emailInput"
-                                type="email"
-                                autocomplete="off"
-                                autocapitalize="none"
-                                spellcheck="false"
-                                wire:model.defer="emailInput"
-                                class="neo-input flex-1"
-                                placeholder="hulaksa@{{ $publicDomains[0] ?? 'example.com' }}"
-                                required
-                            />
-                            <button type="submit" class="neo-btn neo-btn--success px-6">
-                                <i class="fas fa-envelope-open-text"></i>
-                                <span>{{ __('Open inbox') }}</span>
+                <div class="flex flex-col md:flex-row gap-3 items-stretch">
+                    <input
+                        id="emailInput"
+                        type="email"
+                        autocomplete="off"
+                        autocapitalize="none"
+                        spellcheck="false"
+                        wire:model.defer="emailInput"
+                        class="neo-input neo-mailbox-input flex-1"
+                        placeholder="username@{{ $publicDomains[0] ?? 'example.com' }}"
+                        required
+                    />
+                    <button type="submit" class="neo-btn neo-btn--success px-6 whitespace-nowrap">
+                        <i class="fas fa-envelope-open-text"></i>
+                        <span>{{ __('Open Inbox') }}</span>
+                    </button>
+                </div>
+
+                {{-- Hidden node carrying the active email — kept stable for
+                     the legacy copy handler in resources/js/scripts.js
+                     (it reads document.getElementById('email_id').innerText). --}}
+                <span id="email_id" class="hidden">{{ $email }}</span>
+
+                @if ($email || ! $isGuest)
+                    <div class="grid {{ $isGuest ? 'grid-cols-2' : 'grid-cols-2 lg:grid-cols-4' }} gap-2 mt-4">
+                        <button type="button" class="btn_copy neo-btn neo-btn--success justify-center py-3" {{ ! $email ? 'disabled' : '' }}>
+                            <i class="far fa-copy"></i>
+                            <span>{{ __('Copy') }}</span>
+                        </button>
+
+                        <button type="button"
+                            onclick="
+                                document.getElementById('refresh').classList.remove('pause-spinner');
+                                if (typeof _isFetching !== 'undefined') _isFetching = false;
+                                Livewire.dispatch('fetchMessages');
+                            "
+                            class="neo-btn neo-btn--info justify-center py-3" {{ ! $email ? 'disabled' : '' }}>
+                            <i id="refresh" class="fas fa-sync-alt fa-spin-fast pause-spinner"></i>
+                            <span>{{ __('Refresh') }}</span>
+                        </button>
+
+                        @if (! $isGuest)
+                            <button type="button" x-on:click="in_app = true" class="neo-btn neo-btn--accent justify-center py-3">
+                                <i class="far fa-plus-square"></i>
+                                <span>{{ __('New') }}</span>
                             </button>
-                        </div>
 
-                        <p class="mt-3 text-xs font-bold opacity-60">
-                            {{ __('Type the email address that was created for you. You can read OTPs, verify codes, and refresh new mail.') }}
-                        </p>
-
-                        @if (! empty($publicDomains))
-                            <div class="mt-4 pt-4 border-t-[3px] border-black">
-                                <div class="text-xs font-black uppercase tracking-wide mb-2">{{ __('Available domains') }}</div>
-                                <div class="neo-domain-list">
-                                    @foreach ($publicDomains as $d)
-                                        <span class="neo-pill neo-pill--info">@ {{ $d }}</span>
-                                    @endforeach
-                                </div>
-                            </div>
+                            <button type="button" wire:click="deleteEmail" class="neo-btn neo-btn--danger justify-center py-3" {{ ! $email ? 'disabled' : '' }}>
+                                <i class="far fa-trash-alt"></i>
+                                <span>{{ __('Delete') }}</span>
+                            </button>
                         @endif
-
-                        <div class="mt-4 text-xs font-bold opacity-60">
-                            {{ __('Or use a direct link like') }}
-                            <code class="neo-code">{{ url('/mailbox/hulaksa@' . ($publicDomains[0] ?? 'example.com')) }}</code>
-                        </div>
-
-                        <div class="mt-4 pt-4 border-t-[3px] border-black flex justify-end">
-                            <a href="{{ route('login') }}" class="text-xs font-black uppercase underline">
-                                {{ __('Login to create or delete emails') }}
-                            </a>
-                        </div>
                     </div>
-                </form>
+                @endif
             </div>
-        @else
-            {{-- ═══════════ CREATE / RANDOM FORM (logged-in or legacy guest) ═══════════ --}}
-            <div x-show.transition.in="in_app && {{ $canCreate ? 'true' : 'false' }}" class="app-action mt-4 px-6" style="display: none">
+        </form>
+
+        {{-- ═══════════════ LOGGED-IN: NEW EMAIL CREATION FORM ═══════════════
+             Hidden by default, toggled by clicking the "New" button above.
+        --}}
+        @if (! $isGuest && $canCreate)
+            <div x-show.transition.in="in_app" class="neo-create-form mt-4" style="display: none">
                 @if (config('app.settings.captcha') == 'hcaptcha' || config('app.settings.captcha') == 'recaptcha2')
-                    <div class="flex items-center justify-center">
+                    <div class="flex items-center justify-center mb-3">
                         <x-captcha field="captcha" />
                     </div>
                 @endif
 
                 <form wire:submit.prevent="create" method="post">
                     <div class="max-w-screen-md mx-auto flex flex-col gap-3">
-                        @if (count($emails) > 0 && $in_app)
-                            <a href="{{ Util::localizeRoute('mailbox') }}" class="neo-btn neo-btn--success self-start">
-                                <i class="fas fa-angle-double-left"></i>
-                                <span>{{ __('Get back to MailBox') }}</span>
-                            </a>
-                        @endif
+                        <div class="flex justify-end">
+                            <button type="button" x-on:click="in_app = false" class="neo-btn neo-btn--default text-xs py-1 px-3">
+                                <i class="fas fa-times"></i>
+                                <span>{{ __('Close') }}</span>
+                            </button>
+                        </div>
 
                         <div class="neo-card">
                             <input class="neo-input border-0" type="text" name="user" id="user" wire:model.defer="user" placeholder="{{ __('Enter Username') }}" />
@@ -90,19 +103,19 @@
                                                 <a x-on:click="
                                                     $refs.domain.value = '{{ $domain }}'
                                                     $wire.setDomain('{{ $domain }}')
-                                                " class="block px-4 py-2 text-sm leading-5 text-gray-700 cursor-pointer hover:bg-yellow-200 focus:outline-none transition duration-150 ease-in-out">{{ $domain }}</a>
+                                                " class="block px-4 py-2 text-sm leading-5 cursor-pointer hover:bg-[var(--neo-muted)] focus:outline-none transition duration-150 ease-in-out">{{ $domain }}</a>
                                             @endforeach
 
                                             @foreach ($memberDomains as $domain)
-                                                <a class="cursor-not-allowed flex justify-between px-4 py-2 text-sm leading-5 text-gray-400">
+                                                <span class="cursor-not-allowed flex justify-between px-4 py-2 text-sm leading-5 opacity-50">
                                                     <span>{{ $domain }}</span>
                                                     <span class="neo-pill">{{ __('Member Only') }}</span>
-                                                </a>
+                                                </span>
                                             @endforeach
                                         </x-slot>
                                     </x-dropdown>
                                 </div>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-black">
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
                                     <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
                                 </div>
                             </div>
@@ -115,97 +128,7 @@
 
                 <form wire:submit.prevent="random" class="flex justify-center mb-1" method="post">
                     <input id="random" class="neo-btn neo-btn--warning" type="submit" value="{{ __('Create a Random Email') }}" />
-                    @if (! $in_app)
-                        <button type="button" x-on:click="in_app = false" class="neo-btn neo-btn--secondary ml-2"><i class="fas fa-times"></i></button>
-                    @endif
                 </form>
-            </div>
-
-            {{-- ═══════════ EMAIL ADDRESS DISPLAY + BUTTONS ═══════════ --}}
-            <div x-show.transition.in="!in_app || !{{ $canCreate ? 'true' : 'false' }}" class="in-app-actions mt-4 px-6" style="display: none">
-                <form class="max-w-screen-md mx-auto" action="#" method="post">
-                    <div class="relative">
-                        @if ($isGuest)
-                            {{-- Guests don't get a switcher dropdown — show the bare email --}}
-                            <div class="neo-card p-4 text-center text-lg md:text-2xl font-black tracking-tight relative" id="email_id">
-                                <div class="neo-star absolute -top-4 -left-4 w-8 h-8 z-10"></div>
-                                {{ $email ?: __('Loading...') }}
-                            </div>
-                        @else
-                            <x-dropdown align="top" width="full">
-                                <x-slot name="trigger">
-                                    <div class="neo-card p-4 text-center text-lg md:text-2xl font-black tracking-tight cursor-pointer select-none relative" id="email_id">
-                                        <div class="neo-star absolute -top-4 -left-4 w-8 h-8 z-10"></div>
-                                        {{ $email ?: __('Generating Email...') }}
-                                    </div>
-                                </x-slot>
-                                <x-slot name="content">
-                                    @foreach ($emails as $item)
-                                        <x-dropdown-link href="{{ route('switch', $item) }}">
-                                            {{ $item }}
-                                        </x-dropdown-link>
-                                    @endforeach
-                                </x-slot>
-                            </x-dropdown>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-black">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
-                            </div>
-                        @endif
-                    </div>
-                </form>
-                <div class="divider mt-4"></div>
-
-                @if ($isGuest)
-                    {{-- ═══════════ GUEST: only Copy + Refresh ═══════════ --}}
-                    <div class="grid grid-cols-2 gap-2 max-w-screen-md mx-auto">
-                        <div class="btn_copy neo-btn neo-btn--success justify-center py-3">
-                            <i class="far fa-copy"></i>
-                            <span>{{ __('Copy') }}</span>
-                        </div>
-                        <div onclick="
-                            document.getElementById('refresh').classList.remove('pause-spinner');
-                            if(typeof _isFetching !== 'undefined') _isFetching = false;
-                            Livewire.dispatch('fetchMessages');
-                        " class="neo-btn neo-btn--info justify-center py-3">
-                            <i id="refresh" class="fas fa-sync-alt fa-spin-fast pause-spinner"></i>
-                            <span>{{ __('Refresh') }}</span>
-                        </div>
-                    </div>
-                    <div class="max-w-screen-md mx-auto mt-3 flex flex-col sm:flex-row justify-between gap-2 text-xs font-black uppercase">
-                        <a href="{{ Util::localizeRoute('home') }}" class="underline opacity-70 hover:opacity-100">
-                            <i class="fas fa-search"></i>
-                            {{ __('Open another inbox') }}
-                        </a>
-                        <a href="{{ route('login') }}" class="underline opacity-70 hover:opacity-100">
-                            <i class="fas fa-sign-in-alt"></i>
-                            {{ __('Login to create or delete') }}
-                        </a>
-                    </div>
-                @else
-                    {{-- ═══════════ LOGGED-IN: full Copy + Refresh + New + Delete ═══════════ --}}
-                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 max-w-screen-md mx-auto">
-                        <div class="btn_copy neo-btn neo-btn--success justify-center py-3">
-                            <i class="far fa-copy"></i>
-                            <span>{{ __('Copy') }}</span>
-                        </div>
-                        <div onclick="
-                            document.getElementById('refresh').classList.remove('pause-spinner');
-                            if(typeof _isFetching !== 'undefined') _isFetching = false;
-                            Livewire.dispatch('fetchMessages');
-                        " class="neo-btn neo-btn--info justify-center py-3">
-                            <i id="refresh" class="fas fa-sync-alt fa-spin-fast pause-spinner"></i>
-                            <span>{{ __('Refresh') }}</span>
-                        </div>
-                        <div x-on:click="in_app = true" class="neo-btn neo-btn--accent justify-center py-3">
-                            <i class="far fa-plus-square"></i>
-                            <span>{{ __('New') }}</span>
-                        </div>
-                        <div wire:click="deleteEmail" class="neo-btn neo-btn--danger justify-center py-3">
-                            <i class="far fa-trash-alt"></i>
-                            <span>{{ __('Delete') }}</span>
-                        </div>
-                    </div>
-                @endif
             </div>
         @endif
     </div>

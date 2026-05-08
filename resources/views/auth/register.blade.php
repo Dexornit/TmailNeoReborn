@@ -4,6 +4,13 @@
             <x-authentication-card-logo />
         </x-slot>
 
+        <div class="mb-4">
+            <a href="{{ url('/') }}" class="neo-btn neo-btn--default text-xs py-1 px-3">
+                <i class="fas fa-angle-left"></i>
+                <span>{{ __('Back to Mailbox') }}</span>
+            </a>
+        </div>
+
         <x-validation-errors class="mb-4" />
 
         <form method="POST" action="{{ route("register") }}">

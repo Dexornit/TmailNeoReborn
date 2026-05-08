@@ -65,8 +65,14 @@ class Actions extends Component
     }
 
     /**
-     * Guest-only entry point: look up an existing email by address and
-     * place it in the session. Never auto-creates new emails.
+     * Single-page entry point: look up an existing email by address and
+     * place it in the session, then trigger an inbox fetch in-place.
+     *
+     *  - Guests: must point to an existing active row in the `emails` table.
+     *  - Logged-in users: an unknown email auto-creates (legacy behavior).
+     *
+     * No redirect — the App livewire component is updated via syncEmail and
+     * fetchMessages events so the inbox refreshes without a page reload.
      */
     public function openInbox()
     {
@@ -83,21 +89,36 @@ class Actions extends Component
         RateLimiter::hit($key, 60);
 
         $row = EmailManager::findActive($email);
+
         if (! $row) {
-            return $this->showAlert('error', __('Email not found. Ask the admin to create it first.'));
+            if (! Auth::check()) {
+                return $this->showAlert('error', __('Email not found. Ask the admin to create it first.'));
+            }
+
+            // Logged-in user can auto-create on the fly via the same path.
+            $email = TMail::createCustomEmailFull($email);
+        } else {
+            $row->touchLastUsed();
+            TMail::ensureEmailInSession($email);
         }
 
-        $row->touchLastUsed();
-        TMail::ensureEmailInSession($email);
+        $this->email = $email;
+        $this->hasEmail = true;
+        $this->emails = TMail::getEmails();
+        $this->emailInput = $email;
 
-        return redirect(Util::localizeRoute('mailbox'));
+        // Push the new email into the App livewire component and ask it to
+        // refresh — no full-page redirect needed.
+        $this->dispatch('syncEmail', email: $email);
+        $this->dispatch('fetchMessages');
     }
 
     public function syncEmail($email)
     {
         $this->email = $email;
-        if (count($this->emails) == 0) {
-            $this->emails = [$email];
+        $this->hasEmail = ! empty($email);
+        if (! empty($email) && ! in_array($email, $this->emails ?? [], true)) {
+            $this->emails = TMail::getEmails();
         }
     }
 

@@ -128,12 +128,14 @@
         @if (! isset($page) && ! isset($post))
             <script>
                 document.addEventListener('DOMContentLoaded', () => {
-                    const email = '{{ App\Services\TMail::getEmail(true) }}';
+                    const email = '{{ App\Services\TMail::getEmail(false) ?? "" }}';
                     const add_mail_in_title = '{{ config("app.settings.add_mail_in_title") ? "yes" : "no" }}';
-                    if (add_mail_in_title === 'yes') {
+                    if (add_mail_in_title === 'yes' && email) {
                         document.title += ` - ${email}`;
                     }
-                    Livewire.dispatch('fetchMessages');
+                    if (email) {
+                        Livewire.dispatch('fetchMessages');
+                    }
                 });
             </script>
         @endif
@@ -255,28 +257,11 @@
             </script>
         @endif
 
-        @if (config("app.settings.enable_dark_mode"))
-            <script>
-                document.addEventListener('DOMContentLoaded', () => {
-                    const darkmode = localStorage.getItem('darkmode');
-                    if (darkmode && darkmode == 'enabled') {
-                        enableDarkMode();
-                    } else if (!darkmode && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                        enableDarkMode();
-                    } else {
-                        disableDarkMode();
-                    }
-                });
-                function enableDarkMode() {
-                    document.documentElement.setAttribute('data-mode', 'dark');
-                    localStorage.setItem('darkmode', 'enabled');
-                }
-                function disableDarkMode() {
-                    document.documentElement.setAttribute('data-mode', 'light');
-                    localStorage.setItem('darkmode', 'disabled');
-                }
-            </script>
-        @endif
+        {{-- Dark mode intentionally disabled — neobrutalism cream palette is light-only. --}}
+        <script>
+            document.documentElement.setAttribute('data-mode', 'light');
+            try { localStorage.setItem('darkmode', 'disabled'); } catch (e) {}
+        </script>
 
         {{-- Global Scripts --}}
         {!! config("app.settings.global.js") !!}

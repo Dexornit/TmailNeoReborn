@@ -4,6 +4,13 @@
             <x-authentication-card-logo />
         </x-slot>
 
+        <div class="mb-4">
+            <a href="{{ url('/') }}" class="neo-btn neo-btn--default text-xs py-1 px-3">
+                <i class="fas fa-angle-left"></i>
+                <span>{{ __('Back to Mailbox') }}</span>
+            </a>
+        </div>
+
         <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
             {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
         </div>

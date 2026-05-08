@@ -47,13 +47,6 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
-                    @if (config("app.settings.enable_dark_mode"))
-                        <div x-data="{ darkmode: localStorage.getItem('darkmode') == 'enabled' ? true : false }" class="text-lg cursor-pointer">
-                            <i onclick="enableDarkMode()" x-on:click="darkmode = true" x-show="!darkmode" class="fas fa-moon"></i>
-                            <i onclick="disableDarkMode()" x-on:click="darkmode = false" x-show="darkmode" class="fas fa-sun text-yellow-500"></i>
-                        </div>
-                    @endif
-
                     @if (auth()->check())
                         <x-dropdown align="right" width="48">
                             <x-slot name="trigger">
@@ -105,13 +98,6 @@
     {{-- ═══════════ MOBILE NAV ═══════════ --}}
     <div class="lg:hidden" x-data="{ open: false }">
         <div class="flex items-center gap-3 absolute top-8 right-6">
-            @if (config("app.settings.enable_dark_mode"))
-                <div x-data="{ darkmode: localStorage.getItem('darkmode') == 'enabled' ? true : false }" class="text-lg cursor-pointer">
-                    <i onclick="enableDarkMode()" x-on:click="darkmode = true" x-show="!darkmode" class="fas fa-moon"></i>
-                    <i onclick="disableDarkMode()" x-on:click="darkmode = false" x-show="darkmode" class="fas fa-sun text-yellow-500"></i>
-                </div>
-            @endif
-
             @if (auth()->check())
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
@@ -149,7 +135,7 @@
                 </svg>
             </div>
         </div>
-        <div x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" @click.away="open = false" class="fixed inset-0 min-h-screen w-full z-50" style="background-color: rgba(253,246,227,0.98);">
+        <div x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" @click.away="open = false" class="neo-mobile-menu fixed inset-0 min-h-screen w-full z-50">
             <div @click="open = false" class="absolute top-6 right-6 w-8 cursor-pointer">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />

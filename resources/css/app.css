@@ -6,30 +6,25 @@
     display: none;
 }
 
-/* ═══════════════ NEOBRUTALISM GLOBAL TOKENS ═══════════════ */
+/* ═══════════════ NEOBRUTALISM GLOBAL TOKENS ═══════════════
+   Light-only cream/peach palette. Dark mode is intentionally not
+   supported — keep contrast predictable across all surfaces. */
 :root {
-    --neo-bg: #FDF6E3;
-    --neo-card-bg: #fff;
-    --neo-shadow: #000;
-    --neo-border: #000;
-    --neo-accent: #F7DC6F;       /* yellow   — default / warning */
-    --neo-accent-2: #A3E4D7;     /* teal     — success / copy */
-    --neo-accent-3: #AED6F1;     /* blue     — info / primary / refresh */
-    --neo-accent-4: #F5CBA7;     /* orange   — accent / new */
-    --neo-accent-5: #F1948A;     /* red      — error / delete */
-    --neo-accent-6: #D7BDE2;     /* purple   — footer / cookie */
-    --neo-muted: #F4ECD8;        /* tinted card hover */
-    --neo-divider: #E5DDC9;
+    --neo-bg: #FBEFD9;           /* warm cream — page background */
+    --neo-bg-alt: #F4E2C2;       /* darker cream — header/footer band */
+    --neo-card-bg: #FFFBF2;      /* ivory white — cards */
+    --neo-shadow: #2B2118;       /* dark espresso — soft black for shadows */
+    --neo-border: #2B2118;       /* dark espresso — borders */
+    --neo-text: #2B2118;         /* primary text */
+    --neo-accent: #F4B886;       /* peach     — default / warning / star */
+    --neo-accent-2: #B7C9A8;     /* sage      — success / copy */
+    --neo-accent-3: #9CC1D9;     /* soft blue — info / primary / refresh */
+    --neo-accent-4: #F4B886;     /* peach     — accent / new (alias of accent) */
+    --neo-accent-5: #E08585;     /* coral red — error / delete */
+    --neo-accent-6: #F4E2C2;     /* cream-2   — footer / cookie */
+    --neo-muted: #F8E8CB;        /* tinted card hover */
+    --neo-divider: #E7D4B0;
     --neo-radius: 0;
-}
-
-html[data-mode="dark"] {
-    --neo-bg: #1A1A1A;
-    --neo-card-bg: #2A2A2A;
-    --neo-shadow: #fff;
-    --neo-border: #fff;
-    --neo-muted: #333;
-    --neo-divider: #444;
 }
 
 /* ─── Card ─── */
@@ -261,15 +256,32 @@ html[data-mode="dark"] {
 .neobrutalism-theme {
     background-color: var(--neo-bg);
     font-family: var(--body-font), 'Public Sans', sans-serif;
-    color: #000;
+    color: var(--neo-text);
 }
 
 .neo-header { background-color: var(--neo-bg); }
 .neo-footer {
-    background-color: var(--neo-accent-6);
+    background-color: var(--neo-bg-alt);
     overflow-wrap: break-word;
     word-break: break-word;
 }
+
+/* Full-screen mobile menu overlay (replaces inline cream rgba) */
+.neo-mobile-menu {
+    background-color: rgba(251, 239, 217, 0.98);
+}
+
+/* Single-page mailbox bar — input + Open Inbox + Copy/Refresh */
+.neo-mailbox-bar { max-width: 720px; margin: 0 auto; }
+.neo-mailbox-input {
+    font-family: 'Space Mono', 'Courier New', monospace;
+    font-size: 1rem;
+    letter-spacing: 0.02em;
+}
+@media (min-width: 768px) {
+    .neo-mailbox-input { font-size: 1.125rem; }
+}
+.neo-create-form { max-width: 720px; margin: 0 auto; }
 
 /* Mailbox list rows */
 .neo-msg {
@@ -493,19 +505,7 @@ input[type="file"]::file-selector-button {
     }
 }
 
-html[data-mode="dark"] {
-    .striped-img-preview {
-        color: #111827;
-        background: repeating-linear-gradient(45deg, #111, #111 5px, #222 5px, #222 10px);
-    }
-    .disabled-section {
-        background: repeating-linear-gradient(45deg, #111, #111 5px, #333 5px, #333 10px);
-    }
-    input[type="file"]::file-selector-button {
-        background: #111827;
-        color: #fff;
-    }
-}
+/* Dark mode intentionally removed in favor of a single light cream palette. */
 
 /* Hide scrollbar for Chrome, Safari and Opera */
 .scrollbar-thin::-webkit-scrollbar {
