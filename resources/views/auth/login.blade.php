@@ -41,7 +41,7 @@
 
             <div class="flex items-center justify-end mt-4">
                 @if (Route::has("password.request"))
-                    <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route("password.request") }}">
+                    <a class="underline text-sm text-[#1F2937] hover:text-black rounded-md focus:outline-none" href="{{ route("password.request") }}">
                         {{ __("Forgot your password?") }}
                     </a>
                 @endif
@@ -53,7 +53,7 @@
         </form>
     </x-authentication-card>
     <div class="fixed bottom-10 left-1/2 -translate-x-1/2">
-        <div class="text-center text-white mb-4">- or -</div>
+        <div class="text-center text-[#1F2937] font-bold mb-4">— {{ __('or') }} —</div>
         <a href="{{ route("register") }}">
             <x-button style="primary" icon="hgi-user-01">
                 {{ __("Create an account") }}

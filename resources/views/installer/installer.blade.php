@@ -1,22 +1,22 @@
 <div class="grid grid-cols-6 gap-6">
     <div wire:loading wire:target="save">
-        <div class="flex items-center w-full h-full fixed top-0 left-0 bg-white dark:bg-gray-900 opacity-75 z-50">
-            <div class="text-3xl mx-auto">
+        <div class="flex items-center w-full h-full fixed top-0 left-0 bg-[#FFFBF1] opacity-90 z-50">
+            <div class="text-3xl mx-auto text-[#1F2937]">
                 <i class="hgi hgi-stroke hgi-loading-03 hgi-spin"></i>
             </div>
         </div>
     </div>
     @if ($success)
         <div class="col-span-6">
-            <div class="w-full py-3 px-4 overflow-hidden rounded-md flex items-center border bg-green-50 dark:bg-green-900 border-green-500">
-                <div class="text-green-500 w-10">
+            <div class="neo-alert neo-alert--ok w-full py-3 px-4 overflow-hidden flex items-center">
+                <div class="text-[#1F2937] w-10">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
                 </div>
                 <div class="ml-4 flex-1">
-                    <div class="text-lg text-gray-600 dark:text-gray-50 font-semibold">{{ __("Success") }}</div>
-                    <div class="text-sm">{{ $success }}</div>
+                    <div class="text-lg text-[#1F2937] font-bold">{{ __("Success") }}</div>
+                    <div class="text-sm text-[#1F2937]">{{ $success }}</div>
                 </div>
             </div>
         </div>
@@ -24,15 +24,15 @@
 
     @if ($error)
         <div class="col-span-6">
-            <div class="w-full py-3 px-4 overflow-hidden rounded-md flex items-center border bg-red-50 dark:bg-red-900 border-red-500">
-                <div class="text-red-500 w-10">
+            <div class="neo-alert neo-alert--err w-full py-3 px-4 overflow-hidden flex items-center">
+                <div class="text-white w-10">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
                 <div class="ml-4 flex-1">
-                    <div class="text-lg text-gray-600 dark:text-gray-50 font-semibold">{{ __("Error") }}</div>
-                    <div class="text-sm">{{ $error }}</div>
+                    <div class="text-lg text-white font-bold">{{ __("Error") }}</div>
+                    <div class="text-sm text-white">{{ $error }}</div>
                 </div>
             </div>
         </div>
@@ -236,14 +236,14 @@
             </div>
         @endif
         <div class="col-span-6">
-            <a class="w-full block text-center bg-indigo-700 form-input rounded-md text-white border-0 text-sm" href="{{ route("login") }}">
+            <a class="neo-btn neo-btn--primary w-full block text-center text-[#1F2937] border-0 text-sm py-3" href="{{ route("login") }}">
                 <span class="mr-3 font-bold">{{ __("Visit TMail - Admin Panel") }}</span>
                 <i class="hgi hgi-stroke hgi-arrow-right-02"></i>
             </a>
         </div>
     @else
         <div class="col-span-6">
-            <button wire:click="save" class="w-full bg-indigo-700 form-input rounded-md text-white border-0 text-sm">
+            <button wire:click="save" class="neo-btn neo-btn--primary w-full text-[#1F2937] text-sm py-3">
                 <span class="mr-3 font-bold">{{ __("Save & Next") }}</span>
                 <i class="hgi hgi-stroke hgi-arrow-right-02"></i>
             </button>

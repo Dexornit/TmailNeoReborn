@@ -11,12 +11,12 @@
             </a>
         </div>
 
-        <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
+        <div class="mb-4 text-sm text-[#1F2937] font-medium">
             {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
         </div>
 
         @session('status')
-            <div class="mb-4 font-medium text-sm text-green-600 dark:text-green-400">
+            <div class="mb-4 font-bold text-sm text-[#1F2937] bg-[#CADCAE] border-2 border-[#1F2937] px-3 py-2">
                 {{ $value }}
             </div>
         @endsession
