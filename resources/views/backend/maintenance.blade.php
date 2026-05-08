@@ -22,7 +22,12 @@
             </div>
         @endif
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button wire:click="repairStorageDirectories" wire:loading.attr="disabled" class="neo-btn neo-btn--primary p-4 text-left">
+                <i class="hgi hgi-stroke hgi-folder-add"></i>
+                <div class="font-semibold">{{ __('Repair Storage Directories') }}</div>
+                <div class="text-xs font-normal opacity-80 mt-1">{{ __('Recreate framework/views, sessions, cache, etc. (fixes "valid cache path" error)') }}</div>
+            </button>
             <button wire:click="migrate" wire:loading.attr="disabled" class="neo-btn neo-btn--primary p-4 text-left">
                 <i class="hgi hgi-stroke hgi-database-02"></i>
                 <div class="font-semibold">{{ __('Run Migrations') }}</div>
@@ -64,7 +69,7 @@
             </div>
         </div>
 
-        <div wire:loading wire:target="migrate,clearCache,storageLink,refreshChecks" class="text-sm text-gray-600">
+        <div wire:loading wire:target="migrate,clearCache,storageLink,refreshChecks,repairStorageDirectories" class="text-sm text-gray-600">
             <i class="hgi hgi-stroke hgi-loading-03 hgi-spin"></i>
             {{ __('Working...') }}
         </div>

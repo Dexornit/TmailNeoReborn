@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Backend;
 
+use App\Livewire\Installer\Installer;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -22,6 +23,26 @@ class Maintenance extends Component {
     public string $error = '';
 
     public function mount() {
+        // Best-effort: make sure the Laravel runtime dirs exist on every visit
+        // so the page itself can render even on a freshly-uploaded shared host.
+        Installer::ensureRuntimeDirectories();
+        $this->checks = $this->runHealthChecks();
+    }
+
+    public function repairStorageDirectories() {
+        $this->reset(['message', 'error']);
+        $created = Installer::ensureRuntimeDirectories();
+        if (empty($created)) {
+            $this->message = 'All required directories already existed. Permissions normalized to 0775.';
+        } else {
+            $this->message = 'Created ' . count($created) . ' missing director(y/ies): ' . implode(', ', $created);
+        }
+        // After creating views/, blade can compile again -> safe to clear views.
+        try {
+            Artisan::call('view:clear');
+        } catch (\Throwable $e) {
+            Log::warning('view:clear after repair failed: ' . $e->getMessage());
+        }
         $this->checks = $this->runHealthChecks();
     }
 
@@ -88,12 +109,19 @@ class Maintenance extends Component {
             storage_path('framework/cache'),
             storage_path('framework/sessions'),
             storage_path('framework/views'),
+            base_path('bootstrap/cache'),
         ];
-        $unwritable = array_filter($storageDirs, fn($d) => !is_writable($d));
+        $missing = array_filter($storageDirs, fn($d) => !is_dir($d));
+        $unwritable = array_filter($storageDirs, fn($d) => is_dir($d) && !is_writable($d));
         $checks[] = [
-            'name' => 'Storage directories writable',
-            'ok' => empty($unwritable),
-            'detail' => empty($unwritable) ? 'All writable' : 'Not writable: ' . implode(', ', $unwritable)
+            'name' => 'Storage directories exist and writable',
+            'ok' => empty($missing) && empty($unwritable),
+            'detail' => (empty($missing) && empty($unwritable))
+                ? 'All required directories present and writable'
+                : trim(
+                    (empty($missing) ? '' : 'Missing: ' . implode(', ', $missing) . '. ')
+                    . (empty($unwritable) ? '' : 'Not writable: ' . implode(', ', $unwritable))
+                )
         ];
 
         $manifest = public_path('build/manifest.json');
