@@ -5,7 +5,7 @@ with a global neobrutalism theme, public landing page, and admin email managemen
 
 > Designed for **plug-and-play** deployment on shared hosting — no terminal, no `npm`,
 > no `composer install` required after upload. Just upload, fill in `.env`, and open
-> `/install`.
+> `/installer`.
 
 ---
 
@@ -70,10 +70,10 @@ zip -r tmail-deploy.zip . -x ".git/*" "node_modules/*" "tests/*" ".env"
 2. **Copy** `.env.example` to `.env` and edit:
    - `APP_KEY=` (run once locally `php artisan key:generate --show` and paste here,
      or leave blank — the installer will not generate it for you so set it before
-     hitting `/install`).
+     hitting `/installer`).
    - `APP_URL=https://yourdomain.com`
    - `DB_*` — leave blank if you don't know yet, the installer asks again.
-3. **Open `https://yourdomain.com/install`** in a browser.
+3. **Open `https://yourdomain.com/installer`** in a browser.
 4. **Walk through the 4 steps**:
    1. Database connection details
    2. App name + license key (any non-empty string — license is bypassed)
@@ -113,7 +113,7 @@ npm run dev      # or: npm run build
 php artisan serve
 ```
 
-Open `http://localhost:8000/install` to run the installer (only works while
+Open `http://localhost:8000/installer` to run the installer (only works while
 `storage/installed` does not yet exist).
 
 ### Working on the neobrutalism theme
@@ -134,7 +134,7 @@ to touch individual page Blade files.
 ```bash
 rm storage/installed
 # then optionally: rm database/database.sqlite (or drop the MySQL DB)
-# open /install again
+# open /installer again
 ```
 
 ---
@@ -148,7 +148,7 @@ rm storage/installed
 | `403 Forbidden` on `/admin/emails` | Logged-in user is not an admin (`role != 7`). Promote via the users table or via the maintenance shell. |
 | Caches show stale settings after `.env` edit | Log in as admin → `Maintenance` → **Clear All Caches**. |
 | Storage uploads return 404 | Log in as admin → `Maintenance` → **Recreate Storage Symlink**. |
-| Want to re-run the installer | Delete `storage/installed` and re-open `/install`. |
+| Want to re-run the installer | Delete `storage/installed` and re-open `/installer`. |
 
 ---
 

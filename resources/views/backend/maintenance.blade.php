@@ -23,24 +23,24 @@
         @endif
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button wire:click="migrate" wire:loading.attr="disabled" class="border-2 border-black bg-white hover:bg-yellow-100 px-4 py-3 text-sm font-semibold shadow-[3px_3px_0_0_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition">
+            <button wire:click="migrate" wire:loading.attr="disabled" class="neo-btn neo-btn--primary p-4 text-left">
                 <i class="hgi hgi-stroke hgi-database-02"></i>
-                {{ __('Run Migrations') }}
-                <div class="text-xs font-normal text-gray-600 mt-1">{{ __('php artisan migrate --force') }}</div>
+                <div class="font-semibold">{{ __('Run Migrations') }}</div>
+                <div class="text-xs font-normal opacity-80 mt-1">{{ __('php artisan migrate --force') }}</div>
             </button>
-            <button wire:click="clearCache" wire:loading.attr="disabled" class="border-2 border-black bg-white hover:bg-blue-100 px-4 py-3 text-sm font-semibold shadow-[3px_3px_0_0_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition">
+            <button wire:click="clearCache" wire:loading.attr="disabled" class="neo-btn neo-btn--info p-4 text-left">
                 <i class="hgi hgi-stroke hgi-broom"></i>
-                {{ __('Clear All Caches') }}
-                <div class="text-xs font-normal text-gray-600 mt-1">{{ __('php artisan optimize:clear') }}</div>
+                <div class="font-semibold">{{ __('Clear All Caches') }}</div>
+                <div class="text-xs font-normal opacity-80 mt-1">{{ __('php artisan optimize:clear') }}</div>
             </button>
-            <button wire:click="storageLink" wire:loading.attr="disabled" class="border-2 border-black bg-white hover:bg-purple-100 px-4 py-3 text-sm font-semibold shadow-[3px_3px_0_0_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition">
+            <button wire:click="storageLink" wire:loading.attr="disabled" class="neo-btn neo-btn--success p-4 text-left">
                 <i class="hgi hgi-stroke hgi-link-04"></i>
-                {{ __('Recreate Storage Symlink') }}
-                <div class="text-xs font-normal text-gray-600 mt-1">{{ __('php artisan storage:link --force') }}</div>
+                <div class="font-semibold">{{ __('Recreate Storage Symlink') }}</div>
+                <div class="text-xs font-normal opacity-80 mt-1">{{ __('php artisan storage:link --force') }}</div>
             </button>
         </div>
 
-        <div class="border-2 border-black rounded-md overflow-hidden bg-white shadow-[3px_3px_0_0_#000]">
+        <div class="neo-card overflow-hidden">
             <div class="flex items-center justify-between px-4 py-3 border-b-2 border-black bg-gray-50">
                 <h2 class="font-bold">{{ __('Health Checks') }}</h2>
                 <button wire:click="refreshChecks" class="text-xs underline">{{ __('Refresh') }}</button>
