@@ -1,7 +1,7 @@
 <div>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @foreach ($themes as $theme)
-            <div class="shadow-md rounded-lg bg-white dark:bg-gray-800 p-3">
+            <div class="neo-card p-3">
                 <img class="rounded-lg max-w-full" src="{{ asset("themes/" . $theme . "/screenshot.jpg") }}" alt="" onerror="this.src='{{ asset("images/nopreview.jpg") }}'" />
                 <div class="rounded-b-lg pt-3 flex justify-between">
                     <div class="flex items-center">

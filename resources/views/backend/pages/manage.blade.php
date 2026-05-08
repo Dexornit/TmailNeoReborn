@@ -7,7 +7,7 @@
 
     <div class="{{ $addPage || $updatePage ? "" : "hidden" }}">
         <form wire:submit.prevent="savePage" x-data="{ syncSlug: true, justUpdatedSlug: false }">
-            <div class="flex justify-between items-center sticky top-0 bg-gray-100 dark:bg-gray-900 py-4 z-10">
+            <div class="flex justify-between items-center sticky top-0 py-4 z-10" style="background-color: var(--neo-bg);">
                 <x-secondary-button-icon type="button" position="left" icon="hgi-arrow-left-02" wire:click="clearAddUpdate">{{ __("Back") }}</x-secondary-button-icon>
                 <div class="flex items-center gap-2">
                     <x-action-message class="mr-3" on="saved">

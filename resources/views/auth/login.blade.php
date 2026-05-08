@@ -14,7 +14,7 @@
         <x-validation-errors class="mb-4" />
 
         @session("status")
-            <div class="mb-4 font-medium text-sm text-green-600 dark:text-green-400">
+            <div class="neo-alert neo-alert--ok p-3 mb-4 text-sm font-bold">
                 {{ $value }}
             </div>
         @endsession
@@ -35,7 +35,7 @@
             <div class="block mt-4">
                 <label for="remember_me" class="flex items-center">
                     <x-checkbox id="remember_me" name="remember" />
-                    <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __("Remember me") }}</span>
+                    <span class="ms-2 text-sm font-semibold" style="color: var(--neo-text);">{{ __("Remember me") }}</span>
                 </label>
             </div>
 
