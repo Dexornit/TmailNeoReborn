@@ -1,6 +1,6 @@
 <main class="flex-1" x-data="{ show: false, id: 0 }">
     @if ($error)
-        <div id="imap-error" class="flex items-center w-full h-full fixed top-0 left-0 z-50" style="background-color: rgba(241,148,138,0.95);">
+        <div id="imap-error" class="flex items-center w-full h-full fixed top-0 left-0 z-50 neo-imap-error-overlay">
             <div class="flex flex-col mx-auto text-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-24 h-24 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -18,14 +18,14 @@
             {{-- Message List View — always rendered in DOM, hidden with CSS when viewing single message --}}
             <div x-show="!show" style="display: block;" class="list w-full">
                 {{-- Header row always visible --}}
-                <div class="flex items-center py-4 px-5 border-b-[3px] border-black font-black text-xs uppercase w-full" style="background-color: #F7DC6F;">
+                <div class="neo-msg-list-header flex items-center py-4 px-5 w-full">
                     <div class="w-1/2 md:w-3/12 flex-shrink-0">{{ __("Sender") }}</div>
                     <div class="w-1/2 md:w-7/12 flex-shrink-0">{{ __("Subject") }}</div>
                     <div class="hidden md:flex md:w-2/12 flex-shrink-0 justify-end">{{ __("Time") }}</div>
                 </div>
 
                 {{-- Messages or empty/loading state --}}
-                <div class="messages-container flex flex-col flex-1" style="min-height: 320px;">
+                <div class="messages-container flex flex-col flex-1 neo-messages-container">
                     @if ($messages && count($messages) > 0)
                         <div class="messages flex flex-col justify-start">
                             @foreach ($messages as $i => $message)
@@ -66,7 +66,7 @@
 
             {{-- Single Message View --}}
             <div x-show="show" style="display: none;" class="message">
-                <div class="flex items-center py-4 px-5 border-b-[3px] border-black font-bold text-sm" style="background-color: #AED6F1;">
+                <div class="neo-msg-detail-header flex items-center py-4 px-5 font-bold text-sm">
                     <div class="w-full flex justify-between items-center">
                         <div x-on:click="show = false" class="flex items-center cursor-pointer hover:opacity-70">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -79,7 +79,7 @@
                             <button x-on:click="
                                 id = 0
                                 show = false
-                            " class="delete neo-btn py-1 px-3 text-xs" style="background-color: #F1948A;" wire:click="delete(1)">{{ __("Delete") }}</button>
+                            " class="delete neo-btn neo-btn--danger py-1 px-3 text-xs" wire:click="delete(1)">{{ __("Delete") }}</button>
                         </div>
                     </div>
                 </div>

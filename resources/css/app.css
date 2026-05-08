@@ -12,12 +12,15 @@
     --neo-card-bg: #fff;
     --neo-shadow: #000;
     --neo-border: #000;
-    --neo-accent: #F7DC6F;
-    --neo-accent-2: #A3E4D7;
-    --neo-accent-3: #AED6F1;
-    --neo-accent-4: #F5CBA7;
-    --neo-accent-5: #F1948A;
-    --neo-accent-6: #D7BDE2;
+    --neo-accent: #F7DC6F;       /* yellow   — default / warning */
+    --neo-accent-2: #A3E4D7;     /* teal     — success / copy */
+    --neo-accent-3: #AED6F1;     /* blue     — info / primary / refresh */
+    --neo-accent-4: #F5CBA7;     /* orange   — accent / new */
+    --neo-accent-5: #F1948A;     /* red      — error / delete */
+    --neo-accent-6: #D7BDE2;     /* purple   — footer / cookie */
+    --neo-muted: #F4ECD8;        /* tinted card hover */
+    --neo-divider: #E5DDC9;
+    --neo-radius: 0;
 }
 
 html[data-mode="dark"] {
@@ -25,23 +28,48 @@ html[data-mode="dark"] {
     --neo-card-bg: #2A2A2A;
     --neo-shadow: #fff;
     --neo-border: #fff;
+    --neo-muted: #333;
+    --neo-divider: #444;
 }
 
-/* Card */
+/* ─── Card ─── */
 .neo-card {
     border: 3px solid var(--neo-border) !important;
     box-shadow: 5px 5px 0 var(--neo-shadow) !important;
-    border-radius: 0 !important;
+    border-radius: var(--neo-radius) !important;
     background-color: var(--neo-card-bg);
 }
 
-/* Button */
+.neo-card--flat {
+    box-shadow: 3px 3px 0 var(--neo-shadow) !important;
+}
+
+.neo-card--inset {
+    box-shadow: none !important;
+}
+
+/* ─── Button ─── */
 .neo-btn {
     border: 3px solid var(--neo-border) !important;
     box-shadow: 3px 3px 0 var(--neo-shadow) !important;
-    border-radius: 0 !important;
+    border-radius: var(--neo-radius) !important;
     font-weight: 800 !important;
-    transition: all 0.1s ease !important;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    padding: 8px 16px;
+    background-color: #fff;
+    color: #000 !important;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    text-decoration: none !important;
+    transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.1s ease !important;
+}
+
+.neo-btn:hover {
+    filter: brightness(0.95);
 }
 
 .neo-btn:active {
@@ -49,12 +77,21 @@ html[data-mode="dark"] {
     transform: translate(3px, 3px);
 }
 
-.neo-btn--primary { background-color: var(--neo-accent-3); color: #000 !important; }
-.neo-btn--success { background-color: var(--neo-accent-2); color: #000 !important; }
-.neo-btn--info    { background-color: var(--neo-accent-3); color: #000 !important; }
-.neo-btn--warning { background-color: var(--neo-accent); color: #000 !important; }
-.neo-btn--error   { background-color: var(--neo-accent-5); color: #000 !important; }
-.neo-btn--default { background-color: var(--neo-accent); color: #000 !important; }
+.neo-btn:disabled,
+.neo-btn[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.neo-btn--primary { background-color: var(--neo-accent-3); }
+.neo-btn--success { background-color: var(--neo-accent-2); }
+.neo-btn--info    { background-color: var(--neo-accent-3); }
+.neo-btn--warning { background-color: var(--neo-accent); }
+.neo-btn--error,
+.neo-btn--danger  { background-color: var(--neo-accent-5); }
+.neo-btn--default { background-color: var(--neo-accent); }
+.neo-btn--accent  { background-color: var(--neo-accent-4); }
 
 .neo-btn--secondary,
 .neo-btn--secondary-default,
@@ -63,26 +100,27 @@ html[data-mode="dark"] {
 .neo-btn--secondary-info,
 .neo-btn--secondary-warning,
 .neo-btn--secondary-error {
-    background-color: #fff !important;
-    color: #000 !important;
+    background-color: #fff;
 }
 
-.neo-btn--danger {
-    background-color: var(--neo-accent-5) !important;
-    color: #000 !important;
-}
-
-/* Input / select / textarea */
+/* ─── Input / select / textarea ─── */
 .neo-input,
 .neo-select,
 .neo-textarea {
     border: 3px solid var(--neo-border) !important;
-    border-radius: 0 !important;
+    border-radius: var(--neo-radius) !important;
     box-shadow: none !important;
     background-color: #fff;
+    color: #000;
     font-weight: 600;
-    padding: 8px 12px;
+    font-size: 0.9rem;
+    padding: 12px 16px;
+    width: 100%;
+    transition: box-shadow 0.1s ease;
 }
+
+.neo-input::placeholder,
+.neo-textarea::placeholder { color: #aaa; font-weight: 400; }
 
 .neo-input:focus,
 .neo-select:focus,
@@ -91,17 +129,17 @@ html[data-mode="dark"] {
     outline: none !important;
 }
 
-/* Toggle */
+/* ─── Toggle ─── */
 .neo-toggle .neo-toggle-path {
     border: 3px solid var(--neo-border) !important;
-    border-radius: 0 !important;
+    border-radius: var(--neo-radius) !important;
     box-shadow: 2px 2px 0 var(--neo-shadow) !important;
     background-color: #fff !important;
 }
 
 .neo-toggle .neo-toggle-circle {
     border: 2px solid var(--neo-border) !important;
-    border-radius: 0 !important;
+    border-radius: var(--neo-radius) !important;
     background-color: var(--neo-accent) !important;
 }
 
@@ -109,15 +147,15 @@ html[data-mode="dark"] {
     background-color: var(--neo-accent-2) !important;
 }
 
-/* Dialog modal surface */
+/* ─── Dialog modal surface ─── */
 .neo-modal-surface {
     border: 3px solid var(--neo-border) !important;
     box-shadow: 5px 5px 0 var(--neo-shadow) !important;
-    border-radius: 0 !important;
+    border-radius: var(--neo-radius) !important;
     background-color: var(--neo-card-bg) !important;
 }
 
-/* Backend page chrome */
+/* ─── Page chrome ─── */
 .neo-page-bg {
     background-color: var(--neo-bg) !important;
     background-image: radial-gradient(rgba(0, 0, 0, 0.08) 1px, transparent 1px);
@@ -136,46 +174,41 @@ html[data-mode="dark"] {
     color: #000 !important;
 }
 
-.neo-footer-bar a {
-    color: #000 !important;
-}
+.neo-footer-bar a { color: #000 !important; }
 
-/* Auth shell */
+/* ─── Auth + lock shells ─── */
 .neo-auth-shell {
     background-color: var(--neo-bg);
     min-height: 100vh;
 }
 
-.neo-auth-card {
-    border: 3px solid var(--neo-border);
-    box-shadow: 8px 8px 0 var(--neo-shadow);
-    background-color: var(--neo-card-bg);
-}
-
-/* Lock page */
+.neo-auth-card,
 .neo-lock-card {
     border: 3px solid var(--neo-border);
     box-shadow: 8px 8px 0 var(--neo-shadow);
     background-color: var(--neo-card-bg);
-    padding: 32px;
+    border-radius: var(--neo-radius);
 }
 
-/* Alert / banner */
+.neo-lock-card { padding: 32px; }
+
+/* ─── Alert / banner ─── */
 .neo-alert {
     border: 3px solid var(--neo-border) !important;
     box-shadow: 4px 4px 0 var(--neo-shadow) !important;
-    border-radius: 0 !important;
+    border-radius: var(--neo-radius) !important;
 }
 
-/* Table-like rows in admin lists */
-.neo-row {
-    border-bottom: 2px dashed var(--neo-border);
-}
+.neo-alert--ok   { background-color: var(--neo-accent-2); }
+.neo-alert--err  { background-color: var(--neo-accent-5); }
+.neo-alert--warn { background-color: var(--neo-accent-4); }
+.neo-alert--info { background-color: var(--neo-accent-3); }
 
-.neo-row:last-child {
-    border-bottom: none;
-}
+/* ─── Table-like rows ─── */
+.neo-row { border-bottom: 2px dashed var(--neo-border); }
+.neo-row:last-child { border-bottom: none; }
 
+/* ─── Pill ─── */
 .neo-pill {
     border: 2px solid var(--neo-border);
     box-shadow: 2px 2px 0 var(--neo-shadow);
@@ -185,15 +218,197 @@ html[data-mode="dark"] {
     text-transform: uppercase;
     font-size: 0.7rem;
     padding: 2px 8px;
-    border-radius: 0;
+    border-radius: var(--neo-radius);
     display: inline-block;
 }
 
-.neo-pill--ok      { background-color: var(--neo-accent-2); }
-.neo-pill--warn    { background-color: var(--neo-accent-4); }
-.neo-pill--err     { background-color: var(--neo-accent-5); color: #000; }
-.neo-pill--info    { background-color: var(--neo-accent-3); }
-.neo-pill--accent  { background-color: var(--neo-accent); }
+.neo-pill--ok     { background-color: var(--neo-accent-2); }
+.neo-pill--warn   { background-color: var(--neo-accent-4); }
+.neo-pill--err    { background-color: var(--neo-accent-5); }
+.neo-pill--info   { background-color: var(--neo-accent-3); }
+.neo-pill--accent { background-color: var(--neo-accent); }
+
+/* ─── Badge ─── */
+.neo-badge {
+    background-color: #F39C12;
+    border: 2px solid var(--neo-border);
+    padding: 3px 10px;
+    font-weight: 700;
+    box-shadow: 2px 2px 0 var(--neo-shadow);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: #fff;
+    display: inline-block;
+}
+
+/* ─── Decorative star ─── */
+.neo-star {
+    width: 24px;
+    height: 24px;
+    background-color: var(--neo-accent);
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+}
+
+/* ─── Logo wordmark ─── */
+.neo-logo {
+    font-family: 'Space Mono', 'Courier New', monospace;
+    font-weight: 700;
+    font-size: 1.8rem;
+    line-height: 1;
+}
+
+/* ─── Frontend mailbox theme chrome ─── */
+.neobrutalism-theme {
+    background-color: var(--neo-bg);
+    font-family: var(--body-font), 'Public Sans', sans-serif;
+    color: #000;
+}
+
+.neo-header { background-color: var(--neo-bg); }
+.neo-footer {
+    background-color: var(--neo-accent-6);
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+/* Mailbox list rows */
+.neo-msg {
+    border-bottom: 2px dashed var(--neo-border);
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: background-color 0.1s ease;
+}
+
+.neo-msg:hover { background-color: var(--neo-accent); }
+.neo-msg:last-child { border-bottom: none; }
+
+/* Mailbox header bars */
+.neo-msg-list-header {
+    background-color: var(--neo-accent);
+    border-bottom: 3px solid var(--neo-border);
+    font-weight: 900;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+}
+
+.neo-msg-detail-header {
+    background-color: var(--neo-accent-3);
+    border-bottom: 3px solid var(--neo-border);
+}
+
+/* Stack effect under inbox */
+.neo-stack-1,
+.neo-stack-2 {
+    position: absolute;
+    border-left: 3px solid var(--neo-border);
+    border-right: 3px solid var(--neo-border);
+    border-bottom: 3px solid var(--neo-border);
+    background: var(--neo-card-bg);
+    height: 6px;
+}
+
+.neo-stack-1 { bottom: -6px; left: 6px; right: 6px; z-index: -1; }
+.neo-stack-2 { bottom: -12px; left: 12px; right: 12px; z-index: -2; }
+
+.neo-zig-zag {
+    width: 80px;
+    height: 16px;
+    background: linear-gradient(135deg, transparent 25%, var(--neo-accent-3) 25%, var(--neo-accent-3) 50%, transparent 50%, transparent 75%, var(--neo-accent-3) 75%);
+    background-size: 16px 16px;
+}
+
+/* Min-height on inbox area so empty state matches filled state */
+.neobrutalism-theme .mailbox .list .messages,
+.neobrutalism-theme #empty-inbox,
+.neobrutalism-theme .neo-card > .flex-1 { min-height: 400px; }
+
+/* Cookie box override (consistent with neobrutalism palette) */
+#cookie:not(.hidden) {
+    display: flex !important;
+    width: 100% !important;
+    position: static !important;
+    border: 3px solid var(--neo-border) !important;
+    background-color: var(--neo-accent-6) !important;
+    color: #000 !important;
+    box-shadow: 4px 4px 0 var(--neo-shadow) !important;
+    padding: 10px 20px !important;
+    gap: 16px !important;
+    font-weight: 700 !important;
+    font-size: 0.85rem !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-top: 16px !important;
+    border-radius: var(--neo-radius) !important;
+}
+
+#cookie_close {
+    background-color: #fff !important;
+    border: 2px solid var(--neo-border) !important;
+    box-shadow: 2px 2px 0 var(--neo-shadow) !important;
+    color: #000 !important;
+    padding: 4px 12px !important;
+    border-radius: var(--neo-radius) !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+    margin-left: auto !important;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+    cursor: pointer;
+}
+
+#cookie_close:active {
+    box-shadow: 0 0 0 var(--neo-shadow) !important;
+    transform: translate(2px, 2px);
+}
+
+/* Override Alpine dropdown panel inside neobrutalism theme */
+.neobrutalism-theme [x-ref="panel"] {
+    border: 3px solid var(--neo-border) !important;
+    box-shadow: 3px 3px 0 var(--neo-shadow) !important;
+    border-radius: var(--neo-radius) !important;
+}
+
+/* IMAP error overlay (full-screen) */
+.neo-imap-error-overlay {
+    background-color: rgba(241, 148, 138, 0.95);
+}
+
+/* Inbox message body container — keeps a stable height across states */
+.neo-messages-container {
+    min-height: 320px;
+}
+
+/* Social icon button square in nav */
+.neo-btn--social {
+    width: 46px;
+    height: 46px;
+    font-size: 1.5rem;
+    padding: 0 !important;
+}
+
+/* Guest landing input form card */
+.neo-guest-form {
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Domain pill list inside guest form */
+.neo-domain-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Inline code chip used in guest hint */
+.neo-code {
+    font-family: 'Space Mono', 'Courier New', monospace;
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border: 2px solid var(--neo-border);
+    background-color: #fff;
+    border-radius: var(--neo-radius);
+    word-break: break-all;
+}
 
 .pause-spinner {
     animation-play-state: paused;

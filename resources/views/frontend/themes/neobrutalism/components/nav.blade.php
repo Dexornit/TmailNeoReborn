@@ -38,11 +38,11 @@
                         @endif
 
                         @if (Auth::check() && Auth::user()->role == 7)
-                            <a href="{{ route("admin") }}" class="neo-btn py-1 px-3 text-xs" style="background-color: #F1948A;">{{ __("Admin") }}</a>
+                            <a href="{{ route("admin") }}" class="neo-btn neo-btn--danger py-1 px-3 text-xs">{{ __("Admin") }}</a>
                         @endif
 
                         @if (config("app.settings.user_registration.enabled") && ! Auth::check())
-                            <a href="{{ route("login") }}" class="neo-btn py-1 px-3 text-xs" style="background-color: #A3E4D7;">{{ __("Login") }}</a>
+                            <a href="{{ route("login") }}" class="neo-btn neo-btn--success py-1 px-3 text-xs">{{ __("Login") }}</a>
                         @endif
                     </div>
                 </div>
@@ -183,13 +183,17 @@
                         @endforeach
 
                         @if (Auth::check() && Auth::user()->role == 7)
-                            <a href="{{ route("admin") }}" target="_blank" class="neo-btn py-2 px-5 text-sm" style="background-color: #F1948A;">{{ __("Admin") }}</a>
+                            <a href="{{ route("admin") }}" target="_blank" class="neo-btn neo-btn--danger py-2 px-5 text-sm">{{ __("Admin") }}</a>
+                        @endif
+
+                        @if (config("app.settings.user_registration.enabled") && ! Auth::check())
+                            <a href="{{ route("login") }}" class="neo-btn neo-btn--success py-2 px-5 text-sm">{{ __("Login") }}</a>
                         @endif
                     </div>
                     <div class="flex flex-col items-center space-y-3 mt-8">
                         <div class="flex flex-wrap justify-center gap-4">
                             @foreach (config("app.settings.socials", []) as $social)
-                                <a href="{{ $social["link"] }}" target="_blank" class="neo-btn p-3 flex items-center justify-center bg-white hover:scale-105 transition-transform" style="width: 46px; height: 46px; font-size: 25px;" rel="noopener noreferrer">
+                                <a href="{{ $social["link"] }}" target="_blank" class="neo-btn neo-btn--social p-3 flex items-center justify-center bg-white hover:scale-105 transition-transform" rel="noopener noreferrer">
                                     <i class="{{ $social["icon"] }}"></i>
                                 </a>
                             @endforeach
