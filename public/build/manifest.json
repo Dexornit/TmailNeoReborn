@@ -1,0 +1,18 @@
+{
+  "resources/css/app.css": {
+    "file": "assets/app-BSyY0X6t.css",
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-DWAYDVsb.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true
+  },
+  "resources/sass/common.scss": {
+    "file": "assets/common-CM5FHs_M.css",
+    "src": "resources/sass/common.scss",
+    "isEntry": true
+  }
+}
