@@ -26,7 +26,7 @@
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/7.9.1/tinymce.min.js" integrity="sha512-09JpfVm/UE1F4k8kcVUooRJAxVMSfw/NIslGlWE/FGXb2uRO1Nt4BXAJ3LxPqNbO3Hccdu46qaBPp9wVpWAVhA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     </head>
-    <body class="font-sans antialiased bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+    <body class="font-sans antialiased neo-page-bg dark:bg-gray-900 text-gray-900 dark:text-gray-100">
         <x-banner />
 
         <div class="flex flex-col min-h-screen">
@@ -35,7 +35,7 @@
 
                 <!-- Page Heading -->
                 @if (isset($header))
-                    <header class="bg-white text-gray-900 dark:bg-gray-800 dark:text-white shadow">
+                    <header class="neo-section-header text-gray-900 dark:bg-gray-800 dark:text-white">
                         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                             {{ $header }}
                         </div>
@@ -47,7 +47,7 @@
                     {{ $slot }}
                 </main>
             </div>
-            <footer class="bg-gray-900 dark:bg-gray-800 text-white shadow mt-6">
+            <footer class="neo-footer-bar mt-6">
                 <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                     <div class="flex flex-col-reverse md:flex-row justify-between items-center gap-5">
                         <div class="text-sm">{{ __("Powered by TMail") }} v{{ config("app.settings.version") }}</div>

@@ -1,7 +1,7 @@
 <div x-data="{ in_app: {{ $in_app ? "true" : "false" }} }">
     <div>
         {{-- ═══════════ CREATE / RANDOM FORM ═══════════ --}}
-        <div x-show.transition.in="in_app" class="app-action mt-4 px-6" style="display: none">
+        <div x-show.transition.in="in_app && {{ $canCreate ? 'true' : 'false' }}" class="app-action mt-4 px-6" style="display: none">
             @if (config("app.settings.captcha") == "hcaptcha" || config("app.settings.captcha") == "recaptcha2")
                 <div class="flex items-center justify-center">
                     <x-captcha field="captcha" />
@@ -65,7 +65,7 @@
         </div>
 
         {{-- ═══════════ EMAIL ADDRESS DISPLAY + BUTTONS ═══════════ --}}
-        <div x-show.transition.in="!in_app" class="in-app-actions mt-4 px-6" style="display: none">
+        <div x-show.transition.in="!in_app || !{{ $canCreate ? 'true' : 'false' }}" class="in-app-actions mt-4 px-6" style="display: none">
             <form class="max-w-screen-md mx-auto" action="#" method="post">
                 <div class="relative">
                     <x-dropdown align="top" width="full">
@@ -102,14 +102,28 @@
                     <i id="refresh" class="fas fa-sync-alt fa-spin-fast pause-spinner"></i>
                     <span>{{ __("Refresh") }}</span>
                 </div>
-                <div x-on:click="in_app = true" class="neo-btn justify-center py-3" style="background-color: #F5CBA7;">
-                    <i class="far fa-plus-square"></i>
-                    <span>{{ __("New") }}</span>
-                </div>
-                <div wire:click="deleteEmail" class="neo-btn justify-center py-3" style="background-color: #F1948A;">
-                    <i class="far fa-trash-alt"></i>
-                    <span>{{ __("Delete") }}</span>
-                </div>
+                @if ($canCreate)
+                    <div x-on:click="in_app = true" class="neo-btn justify-center py-3" style="background-color: #F5CBA7;">
+                        <i class="far fa-plus-square"></i>
+                        <span>{{ __("New") }}</span>
+                    </div>
+                @else
+                    <a href="{{ route('login') }}" class="neo-btn justify-center py-3 text-black no-underline" style="background-color: #F5CBA7;" title="{{ __('Login to create new email') }}">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>{{ __("Login to create") }}</span>
+                    </a>
+                @endif
+                @if ($canDelete)
+                    <div wire:click="deleteEmail" class="neo-btn justify-center py-3" style="background-color: #F1948A;">
+                        <i class="far fa-trash-alt"></i>
+                        <span>{{ __("Delete") }}</span>
+                    </div>
+                @else
+                    <a href="{{ route('login') }}" class="neo-btn justify-center py-3 text-black no-underline" style="background-color: #F1948A;" title="{{ __('Login to delete email') }}">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>{{ __("Login to delete") }}</span>
+                    </a>
+                @endif
             </div>
         </div>
     </div>

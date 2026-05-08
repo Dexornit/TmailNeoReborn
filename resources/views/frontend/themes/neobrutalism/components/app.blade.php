@@ -100,7 +100,7 @@
                             {{ $message['subject'] }}
                         </div>
                         <div class="py-4 px-5 bg-white">
-                            <iframe class="w-full min-h-[600px]" srcdoc="{{ $message['content'] }}" frameborder="0"></iframe>
+                            <iframe class="w-full min-h-[600px]" srcdoc="{{ $message['content'] }}" frameborder="0" sandbox="allow-same-origin allow-popups" referrerpolicy="no-referrer"></iframe>
                             @if (count($message['attachments']) > 0)
                                 <div class="border-t-2 border-dashed border-gray-200 mt-4 pt-4">
                                     <span class="text-xs font-black uppercase opacity-60">{{ __("Attachments") }}</span>

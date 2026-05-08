@@ -43,6 +43,9 @@ Route::middleware(['verify.install', 'handle.language'])->group(function () {
             Route::get('/users', function () {
                 return view('backend.users');
             })->name('users');
+            Route::get('/emails', function () {
+                return view('backend.emails');
+            })->name('emails');
             Route::get('/themes', function () {
                 return view('backend.themes');
             })->name('themes');

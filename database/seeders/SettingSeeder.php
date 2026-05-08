@@ -4,126 +4,131 @@ namespace Database\Seeders;
 
 use App\Models\Setting;
 use App\Services\Util;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class SettingSeeder extends Seeder {
+class SettingSeeder extends Seeder
+{
     /**
      * Run the database seeds.
      */
-    public function run(): void {
+    public function run(): void
+    {
         $settings = [
-            "name" => "TMail",
-            "version" => "8.0.3",
-            "logo" => "",
-            "favicon" => "",
-            "license_key" => "",
-            "api_keys" => [],
-            "domains" => [],
-            "default_domain" => 0,
-            "homepage" => 0,
-            "app_header" => "",
-            "theme" => "default",
-            "fetch_seconds" => 20,
-            "email_limit" => 5,
-            "fetch_messages_limit" => 15,
-            "ads" => [
-                "one" => "",
-                "two" => "",
-                "three" => "",
-                "four" => "",
-                "five" => ""
+            'name' => 'TMail',
+            'version' => '8.0.3',
+            'logo' => '',
+            'favicon' => '',
+            'license_key' => '',
+            'api_keys' => [],
+            'domains' => [],
+            'default_domain' => 0,
+            'homepage' => 0,
+            'app_header' => '',
+            'theme' => 'neobrutalism',
+            'landing_mode' => 'public',
+            'fetch_seconds' => 20,
+            'email_limit' => 5,
+            'fetch_messages_limit' => 15,
+            'ads' => [
+                'one' => '',
+                'two' => '',
+                'three' => '',
+                'four' => '',
+                'five' => '',
             ],
-            "socials" => [],
-            "colors" => [
-                "primary" => "#0155b5",
-                "secondary" => "#2fc10a",
-                "tertiary" => "#d2ab3e"
+            'socials' => [],
+            'colors' => [
+                'primary' => '#0155b5',
+                'secondary' => '#2fc10a',
+                'tertiary' => '#d2ab3e',
             ],
-            "engine" => "imap",
-            "delivery" => [
-                "key" => Util::generateRandomString(32)
+            'engine' => 'imap',
+            'delivery' => [
+                'key' => Util::generateRandomString(32),
             ],
-            "imap" => [
-                "host" => "localhost",
-                "port" => 993,
-                "encryption" => "ssl",
-                "validate_cert" => true,
-                "username" => "username",
-                "password" => "password",
-                "default_account" => "default",
-                "protocol" => "imap",
-                "cc_check" => false
+            'imap' => [
+                'host' => 'localhost',
+                'port' => 993,
+                'encryption' => 'ssl',
+                'validate_cert' => true,
+                'username' => 'username',
+                'password' => 'password',
+                'default_account' => 'default',
+                'protocol' => 'imap',
+                'cc_check' => false,
             ],
-            "language" => "en",
-            "enable_create_from_url" => false,
-            "forbidden_ids" => [
-                "admin",
-                "catch"
+            'language' => 'en',
+            'enable_create_from_url' => false,
+            'forbidden_ids' => [
+                'admin', 'administrator', 'root', 'postmaster', 'hostmaster',
+                'webmaster', 'abuse', 'security', 'noreply', 'no-reply',
+                'support', 'info', 'sales', 'help', 'mail', 'mailer-daemon',
+                'mailer', 'system', 'staff', 'owner', 'noc',
+                'catch',
             ],
-            "blocked_domains" => [],
-            "cron_password" => Util::generateRandomString(16),
-            "delete" => [
-                "value" => 1,
-                "key" => "d"
+            'blocked_domains' => [],
+            'cron_password' => Util::generateRandomString(16),
+            'delete' => [
+                'value' => 1,
+                'key' => 'd',
             ],
-            "custom" => [
-                "min" => 3,
-                "max" => 15
+            'custom' => [
+                'min' => 3,
+                'max' => 15,
             ],
-            "random" => [
-                "start" => 0,
-                "end" => 0
+            'random' => [
+                'start' => 0,
+                'end' => 0,
             ],
-            "global" => [
-                "css" => "",
-                "js" => "",
-                "header" => "",
-                "footer" => ""
+            'global' => [
+                'css' => '',
+                'js' => '',
+                'header' => '',
+                'footer' => '',
             ],
-            "cookie" => [
-                "enable" => true,
-                "text" => "<p>By using this website you agree to our <a href='#' target='_blank'>Cookie Policy</a></p>"
+            'cookie' => [
+                'enable' => true,
+                'text' => "<p>By using this website you agree to our <a href='#' target='_blank'>Cookie Policy</a></p>",
             ],
-            "disable_used_email" => false,
-            "allow_reuse_email_in_days" => 7,
-            "captcha" => "off",
-            "recaptcha2" => [
-                "site_key" => "",
-                "secret_key" => ""
+            'disable_used_email' => false,
+            'allow_reuse_email_in_days' => 7,
+            'captcha' => 'off',
+            'recaptcha2' => [
+                'site_key' => '',
+                'secret_key' => '',
             ],
-            "recaptcha3" => [
-                "site_key" => "",
-                "secret_key" => ""
+            'recaptcha3' => [
+                'site_key' => '',
+                'secret_key' => '',
             ],
-            "hcaptcha" => [
-                "site_key" => "",
-                "secret_key" => ""
+            'hcaptcha' => [
+                'site_key' => '',
+                'secret_key' => '',
             ],
-            "after_last_email_delete" => "redirect_to_homepage",
-            "date_format" => "d M Y h:i A",
-            "theme_options" => [
-                "mailbox_page" => 0,
-                "button" => [
-                    "text" => "Create your own Temp Mail",
-                    "link" => "https://1.envato.market/tmail"
-                ]
+            'after_last_email_delete' => 'redirect_to_homepage',
+            'date_format' => 'd M Y h:i A',
+            'theme_options' => [
+                'mailbox_page' => 0,
+                'button' => [
+                    'text' => 'Create your own Temp Mail',
+                    'link' => 'https://1.envato.market/tmail',
+                ],
             ],
-            "disable_mailbox_slug" => false,
-            "external_link_masker" => "",
-            "add_mail_in_title" => true,
-            "enable_ad_block_detector" => false,
-            "font_family" => [
-                "head" => "Kadwa",
-                "body" => "Poppins"
+            'disable_mailbox_slug' => false,
+            'external_link_masker' => '',
+            'add_mail_in_title' => true,
+            'enable_ad_block_detector' => false,
+            'font_family' => [
+                'head' => 'Kadwa',
+                'body' => 'Poppins',
             ],
-            "lock" => [
-                "enable" => false,
-                "text" => "",
-                "password" => "nh3dukcjs7p9a2bi5emr480wlxyqv1o6tgf"
+            'lock' => [
+                'enable' => false,
+                'text' => '',
+                'password' => 'nh3dukcjs7p9a2bi5emr480wlxyqv1o6tgf',
             ],
-            "allowed_file_types" => "csv,doc,docx,xls,xlsx,ppt,pptx,xps,pdf,dxf,ai,psd,eps,ps,svg,ttf,zip,rar,tar,gzip,mp3,mpeg,wav,ogg,jpeg,jpg,png,gif,bmp,tif,webm,mpeg4,3gpp,mov,avi,mpegs,wmv,flx,txt",
-            "languages" => [
+            'allowed_file_types' => 'csv,doc,docx,xls,xlsx,ppt,pptx,xps,pdf,dxf,ai,psd,eps,ps,svg,ttf,zip,rar,tar,gzip,mp3,mpeg,wav,ogg,jpeg,jpg,png,gif,bmp,tif,webm,mpeg4,3gpp,mov,avi,mpegs,wmv,flx,txt',
+            'languages' => [
                 'ar' => [
                     'label' => 'Arabic',
                     'type' => 'rtl',
@@ -200,18 +205,18 @@ class SettingSeeder extends Seeder {
                     'is_active' => true,
                 ],
             ],
-            "disqus" => [
-                "enable" => false,
-                "shortname" => "",
+            'disqus' => [
+                'enable' => false,
+                'shortname' => '',
             ],
-            "user_registration" => [
-                "enabled" => false,
-                "require_email_verification" => false,
+            'user_registration' => [
+                'enabled' => false,
+                'require_email_verification' => false,
             ],
-            "language_in_url" => false,
-            "enable_browser_language_detection" => true,
-            "enable_dark_mode" => false,
-            "allowed_domains" => [],
+            'language_in_url' => false,
+            'enable_browser_language_detection' => true,
+            'enable_dark_mode' => false,
+            'allowed_domains' => [],
         ];
         foreach ($settings as $key => $value) {
             /** START Remove in v8.1.0 */
@@ -219,10 +224,10 @@ class SettingSeeder extends Seeder {
                 Setting::where('key', $key)->delete();
             }
             /** END Remove in v8.1.0 */
-            if (!Setting::where('key', $key)->exists()) {
+            if (! Setting::where('key', $key)->exists()) {
                 Setting::create([
                     'key' => $key,
-                    'value' => serialize($value)
+                    'value' => serialize($value),
                 ]);
             }
         }

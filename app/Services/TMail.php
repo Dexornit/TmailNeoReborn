@@ -5,21 +5,21 @@ namespace App\Services;
 use App\Models\Domain;
 use App\Models\Log;
 use App\Models\Message;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Cache;
 use App\Models\Stat;
 use Carbon\Carbon;
 use Ddeboer\Imap\Search\Email\Cc;
-use Ddeboer\Imap\Server;
-use Ddeboer\Imap\SearchExpression;
 use Ddeboer\Imap\Search\Email\To;
 use Ddeboer\Imap\Search\Flag\Unseen;
+use Ddeboer\Imap\SearchExpression;
+use Ddeboer\Imap\Server;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Session;
 
 class TMail extends Model
 {
-
     private const SESSION_EMAIL = 'email';
+
     private const SESSION_EMAILS = 'emails';
 
     /**
@@ -38,6 +38,7 @@ class TMail extends Model
      * Reset automatically per request in PHP-FPM.
      */
     private static ?array $cachedBlockedDomains = null;
+
     private static ?array $cachedAllowedDomains = null;
 
     // ------------------------------------------------------------------
@@ -51,7 +52,7 @@ class TMail extends Model
         }
 
         $imap = $imap ?? config('app.settings.imap');
-        $flags = $imap['protocol'] . '/' . $imap['encryption'];
+        $flags = $imap['protocol'].'/'.$imap['encryption'];
         $flags .= $imap['validate_cert'] ? '/validate-cert' : '/novalidate-cert';
 
         $server = new Server($imap['host'], $imap['port'], $flags);
@@ -89,22 +90,22 @@ class TMail extends Model
          * FastOTP In-Memory Bypass:
          *   - Menerima array `$existing` dari App Livewire.
          *   - Lewati parsing body & attachments (yang sangat berat) untuk email
-         *     yang sudah ada di memori tabel UI. Fetch menjadi instan O(1) 
+         *     yang sudah ada di memori tabel UI. Fetch menjadi instan O(1)
          *     bagi pesan-pesan lama.
          *
          * NEW Optimizations:
          *   - UNSEEN Filter: Fetch hanya email yang belum dibaca (40% faster)
          *   - Pagination: Load email dalam batch (50% faster initial load)
          *
-         * @param string      $email
-         * @param string      $type       'to' | 'cc'
-         * @param array       $deleted    message numbers yang harus dihapus
-         * @param object|null $connection koneksi IMAP yang sudah dibuka
-         * @param array       $existing   array ID pesan yang sudah di-load di UI
-         * @param bool        $unseenOnly fetch hanya email UNSEEN (default: true)
-         * @param int         $offset     pagination offset (default: 0)
-         * @param int|null    $limit      pagination limit (default: from config)
-         * @return array      ['data'=>[...], 'notifications'=>[...], 'has_deleted'=>bool]
+         * @param  string  $email
+         * @param  string  $type  'to' | 'cc'
+         * @param  array  $deleted  message numbers yang harus dihapus
+         * @param  object|null  $connection  koneksi IMAP yang sudah dibuka
+         * @param  array  $existing  array ID pesan yang sudah di-load di UI
+         * @param  bool  $unseenOnly  fetch hanya email UNSEEN (default: true)
+         * @param  int  $offset  pagination offset (default: 0)
+         * @param  int|null  $limit  pagination limit (default: from config)
+         * @return array ['data'=>[...], 'notifications'=>[...], 'has_deleted'=>bool]
          */
         if (config('app.settings.engine') === 'delivery') {
             return array_merge(Message::getMessages($email), ['has_deleted' => false]);
@@ -113,7 +114,7 @@ class TMail extends Model
         // ── IMAP fetch ─────────────────────────────────────────────────
         $connection = $connection ?? self::connectMailBox();
         $mailbox = $connection->getMailbox('INBOX');
-        $limit = $limit ?? (int)config('tmail.pagination_limit', config('app.settings.fetch_messages_limit', 20));
+        $limit = $limit ?? (int) config('tmail.pagination_limit', config('app.settings.fetch_messages_limit', 20));
 
         // Guard: if email is null (session expired), return empty response immediately
         if (empty($email)) {
@@ -121,14 +122,14 @@ class TMail extends Model
         }
 
         try {
-            $search = new SearchExpression();
-            
+            $search = new SearchExpression;
+
             // NEW: UNSEEN Filter - fetch only unread emails if enabled
             $unseenEnabled = config('tmail.enable_unseen_filter', true);
             if ($unseenEnabled && $unseenOnly) {
-                $search->addCondition(new Unseen());
+                $search->addCondition(new Unseen);
             }
-            
+
             // Add To/Cc filter
             $search->addCondition($type === 'cc' ? new Cc($email) : new To($email));
 
@@ -138,10 +139,10 @@ class TMail extends Model
             // Fallback: if UNSEEN search fails, try without UNSEEN filter
             \Illuminate\Support\Facades\Log::warning('[TMail] UNSEEN filter failed, falling back to normal fetch', [
                 'error' => $e->getMessage(),
-                'email' => $email
+                'email' => $email,
             ]);
-            
-            $search = new SearchExpression();
+
+            $search = new SearchExpression;
             $search->addCondition($type === 'cc' ? new Cc($email) : new To($email));
             $messages = $mailbox->getMessages($search, \SORTDATE, true);
         }
@@ -153,17 +154,19 @@ class TMail extends Model
 
         foreach ($messages as $message) {
             $id = $message->getNumber();
-            
+
             // Handle deleted messages
             if (in_array($id, $deleted, true)) {
                 $message->delete();
                 $hasDeleted = true;
+
                 continue;
             }
 
             // NEW: Pagination - skip messages before offset
             if ($skipped < $offset) {
                 $skipped++;
+
                 continue;
             }
 
@@ -179,8 +182,9 @@ class TMail extends Model
             }
 
             // NEW: Pagination - stop after limit reached
-            if (++$count >= $limit)
+            if (++$count >= $limit) {
                 break;
+            }
         }
 
         $response['has_deleted'] = $hasDeleted;
@@ -201,9 +205,9 @@ class TMail extends Model
         $allowed = array_map('strtolower', array_map('trim', explode(',', $file_types)));
 
         $sender = $message->getFrom();
-        $date = $message->getDate() ?: (new \DateTime());
+        $date = $message->getDate() ?: (new \DateTime);
 
-        if (!$message->getDate() && $message->getHeaders()->get('udate')) {
+        if (! $message->getDate() && $message->getHeaders()->get('udate')) {
             $date->setTimestamp($message->getHeaders()->get('udate'));
         }
 
@@ -216,7 +220,7 @@ class TMail extends Model
 
         $masker = config('app.settings.external_link_masker', '');
         if ($masker) {
-            $content = str_replace('href="', 'href="' . $masker, $content);
+            $content = str_replace('href="', 'href="'.$masker, $content);
         }
 
         $obj = [
@@ -243,35 +247,35 @@ class TMail extends Model
         }
 
         $domain = explode('@', $obj['sender_email'])[1] ?? '';
-        
+
         // Use cached domains if enabled, otherwise read from config
         $blockedDomains = $domainCacheEnabled ? self::$cachedBlockedDomains : config('app.settings.blocked_domains', []);
         $allowedDomains = $domainCacheEnabled ? self::$cachedAllowedDomains : config('app.settings.allowed_domains', []);
-        
+
         $blocked = in_array($domain, $blockedDomains, true);
 
         if ($blocked) {
             $obj['subject'] = __('Blocked');
-            $obj['content'] = __('Emails from') . ' ' . $domain . ' ' . __('are blocked by Admin');
+            $obj['content'] = __('Emails from').' '.$domain.' '.__('are blocked by Admin');
         }
 
         if (count($allowedDomains) > 0) {
-            $notAllowed = !in_array($domain, $allowedDomains, true);
+            $notAllowed = ! in_array($domain, $allowedDomains, true);
             if ($notAllowed) {
                 $obj['subject'] = __('Blocked');
-                $obj['content'] = __('Emails from') . ' ' . $domain . ' ' . __('are blocked by Admin');
+                $obj['content'] = __('Emails from').' '.$domain.' '.__('are blocked by Admin');
             }
         }
 
-        if ($message->hasAttachments() && !$blocked) {
+        if ($message->hasAttachments() && ! $blocked) {
             $attachments = $message->getAttachments();
-            $directory = './tmp/attachments/' . $obj['id'] . '/';
-            
+            $directory = './tmp/attachments/'.$obj['id'].'/';
+
             // NEW: Check if lazy load is enabled
             $lazyLoadEnabled = config('tmail.enable_lazy_load', true);
             $shouldLazyLoad = $lazyLoadEnabled && $lazyLoad;
 
-            if (!is_dir($directory)) {
+            if (! is_dir($directory)) {
                 mkdir($directory, 0777, true);
             }
 
@@ -280,30 +284,30 @@ class TMail extends Model
                 $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
 
                 if (in_array($extension, $allowed, true)) {
-                    $filepath = $directory . $filename;
+                    $filepath = $directory.$filename;
                     $structure = $attachment->getStructure();
-                    
+
                     // Check if this is an inline image (cid:)
                     $isInline = isset($structure->id) && str_contains($obj['content'], trim($structure->id, '<>'));
 
                     if ($isInline) {
                         // Always download inline images for email display
-                        if (!file_exists($filepath)) {
+                        if (! file_exists($filepath)) {
                             file_put_contents($filepath, $attachment->getDecodedContent());
                         }
 
                         if ($filename !== 'undefined') {
-                            $url = env('APP_URL') . str_replace('./', '/', $filepath);
-                            $obj['content'] = str_replace('cid:' . trim($structure->id, '<>'), $url, $obj['content']);
-                            
+                            $url = env('APP_URL').str_replace('./', '/', $filepath);
+                            $obj['content'] = str_replace('cid:'.trim($structure->id, '<>'), $url, $obj['content']);
+
                             $obj['attachments'][] = [
                                 'file' => $filename,
                                 'url' => $url,
                                 'downloaded' => true,
-                                'inline' => true
+                                'inline' => true,
                             ];
                         }
-                    } else if ($shouldLazyLoad) {
+                    } elseif ($shouldLazyLoad) {
                         // NEW: Lazy load - save metadata only, don't download yet
                         if ($filename !== 'undefined') {
                             $obj['attachments'][] = [
@@ -312,22 +316,22 @@ class TMail extends Model
                                 'type' => $extension,
                                 'downloaded' => false,
                                 'inline' => false,
-                                'url' => null
+                                'url' => null,
                             ];
                         }
                     } else {
                         // Normal mode: download immediately
-                        if (!file_exists($filepath)) {
+                        if (! file_exists($filepath)) {
                             file_put_contents($filepath, $attachment->getDecodedContent());
                         }
 
                         if ($filename !== 'undefined') {
-                            $url = env('APP_URL') . str_replace('./', '/', $filepath);
+                            $url = env('APP_URL').str_replace('./', '/', $filepath);
                             $obj['attachments'][] = [
                                 'file' => $filename,
                                 'url' => $url,
                                 'downloaded' => true,
-                                'inline' => false
+                                'inline' => false,
                             ];
                         }
                     }
@@ -336,7 +340,7 @@ class TMail extends Model
         }
 
         $notification = '';
-        if (!$message->isSeen()) {
+        if (! $message->isSeen()) {
             $notification = [
                 'subject' => $obj['subject'],
                 'sender_name' => $obj['sender_name'],
@@ -346,7 +350,7 @@ class TMail extends Model
             if (env('ENABLE_TMAIL_LOGS', false) && $email) {
                 file_put_contents(
                     storage_path('logs/tmail.csv'),
-                    request()->ip() . ',' . date('Y-m-d h:i:s a') . ',' . $obj['sender_email'] . ',' . $email . PHP_EOL,
+                    request()->ip().','.date('Y-m-d h:i:s a').','.$obj['sender_email'].','.$email.PHP_EOL,
                     FILE_APPEND
                 );
             }
@@ -375,19 +379,20 @@ class TMail extends Model
 
     /**
      * Download attachment on-demand for lazy loading.
-     * 
-     * @param int    $messageNumber IMAP message number
-     * @param string $filename      Attachment filename
+     *
+     * @param  int  $messageNumber  IMAP message number
+     * @param  string  $filename  Attachment filename
      * @return array ['success' => bool, 'url' => string|null, 'error' => string|null]
      */
     public static function downloadAttachment(int $messageNumber, string $filename): array
     {
-        $directory = './tmp/attachments/' . $messageNumber . '/';
-        $filepath = $directory . $filename;
+        $directory = './tmp/attachments/'.$messageNumber.'/';
+        $filepath = $directory.$filename;
 
         // Check if already downloaded
         if (file_exists($filepath)) {
-            $url = env('APP_URL') . str_replace('./', '/', $filepath);
+            $url = env('APP_URL').str_replace('./', '/', $filepath);
+
             return ['success' => true, 'url' => $url, 'error' => null];
         }
 
@@ -397,23 +402,24 @@ class TMail extends Model
             $mailbox = $connection->getMailbox('INBOX');
             $message = $mailbox->getMessage($messageNumber);
 
-            if (!$message) {
+            if (! $message) {
                 return ['success' => false, 'url' => null, 'error' => 'Message not found'];
             }
 
             $attachments = $message->getAttachments();
-            
+
             foreach ($attachments as $attachment) {
                 if ($attachment->getFilename() === $filename) {
                     // Create directory if not exists
-                    if (!is_dir($directory)) {
+                    if (! is_dir($directory)) {
                         mkdir($directory, 0777, true);
                     }
 
                     // Download and save attachment
                     file_put_contents($filepath, $attachment->getDecodedContent());
-                    
-                    $url = env('APP_URL') . str_replace('./', '/', $filepath);
+
+                    $url = env('APP_URL').str_replace('./', '/', $filepath);
+
                     return ['success' => true, 'url' => $url, 'error' => null];
                 }
             }
@@ -424,7 +430,7 @@ class TMail extends Model
             \Illuminate\Support\Facades\Log::error('[TMail] Download attachment failed', [
                 'message_number' => $messageNumber,
                 'filename' => $filename,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return ['success' => false, 'url' => null, 'error' => $e->getMessage()];
@@ -442,15 +448,18 @@ class TMail extends Model
         if (Session::has(self::SESSION_EMAIL)) {
             return Session::get(self::SESSION_EMAIL);
         }
-        return $generate ?self::generateRandomEmail() : null;
+
+        return $generate ? self::generateRandomEmail() : null;
     }
 
     public static function getEmails(): array
     {
         if (Session::has(self::SESSION_EMAILS)) {
             $emails = json_decode(Session::get(self::SESSION_EMAILS), true);
+
             return is_array($emails) ? $emails : [];
         }
+
         return [];
     }
 
@@ -459,6 +468,28 @@ class TMail extends Model
         $emails = self::getEmails();
         if (in_array($email, $emails, true)) {
             Session::put(self::SESSION_EMAIL, $email);
+        }
+    }
+
+    /**
+     * Place an existing email into the current session, adding it to the
+     * SESSION_EMAILS list if not already present. Used when accessing an
+     * email that was created elsewhere (admin panel, URL, login, etc.)
+     * without going through createCustomEmail.
+     */
+    public static function ensureEmailInSession(string $email): void
+    {
+        $email = strtolower(trim($email));
+        if ($email === '' || ! str_contains($email, '@')) {
+            return;
+        }
+
+        Session::put(self::SESSION_EMAIL, $email);
+
+        $emails = self::getEmails();
+        if (! in_array($email, $emails, true)) {
+            $emails[] = $email;
+            Session::put(self::SESSION_EMAILS, json_encode($emails));
         }
     }
 
@@ -474,8 +505,7 @@ class TMail extends Model
         if ($emails) {
             self::setEmail($emails[0]);
             Session::put(self::SESSION_EMAILS, json_encode($emails));
-        }
-        else {
+        } else {
             Session::forget(self::SESSION_EMAIL);
             Session::forget(self::SESSION_EMAILS);
         }
@@ -495,7 +525,7 @@ class TMail extends Model
         Session::put(self::SESSION_EMAIL, $email);
 
         $emails = self::getEmails();
-        if (!in_array($email, $emails, true)) {
+        if (! in_array($email, $emails, true)) {
             self::incrementEmailStats();
             $emails[] = $email;
             Session::put(self::SESSION_EMAILS, json_encode($emails));
@@ -509,8 +539,8 @@ class TMail extends Model
     public static function createCustomEmailFull($email): string
     {
         [$username, $domain] = explode('@', $email);
-        $min = (int)config('app.settings.custom.min');
-        $max = (int)config('app.settings.custom.max');
+        $min = (int) config('app.settings.custom.min');
+        $max = (int) config('app.settings.custom.max');
 
         if (strlen($username) < $min || strlen($username) > $max) {
             $username = (new self)->generateRandomUsername();
@@ -530,9 +560,10 @@ class TMail extends Model
         }
 
         $domain = in_array($domain, $domains, true) ? $domain : ($domains[0] ?? '');
-        $email = $username . '@' . $domain;
+        $email = $username.'@'.$domain;
 
         self::storeEmail($email);
+
         return $email;
     }
 
@@ -557,7 +588,7 @@ class TMail extends Model
     public static function generateRandomEmail($store = true): string
     {
         $tmail = new self;
-        $email = $tmail->generateRandomUsername() . '@' . $tmail->getRandomDomain();
+        $email = $tmail->generateRandomUsername().'@'.$tmail->getRandomDomain();
 
         if ($store) {
             self::storeEmail($email);
@@ -581,6 +612,7 @@ class TMail extends Model
     protected function generatedRandomBetweenLength($start, $end): string
     {
         $length = rand($start, $end);
+
         return $this->generateRandomString($length);
     }
 
@@ -588,6 +620,7 @@ class TMail extends Model
     {
         $domains = Domain::getDomainsForCurrentUser();
         $count = count($domains);
+
         return $count > 0 ? $domains[rand(0, $count - 1)] : '';
     }
 
@@ -595,7 +628,7 @@ class TMail extends Model
     {
         $c = 'bcdfghjklmnprstvwz';
         $v = 'aeiou';
-        $a = $c . $v;
+        $a = $c.$v;
         $random = '';
 
         for ($j = 0; $j < 2; $j++) {
