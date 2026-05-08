@@ -3,63 +3,115 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Email;
 use App\Models\Page;
 use App\Models\Post;
 use App\Models\Setting;
+use App\Services\EmailManager;
 use App\Services\TMail;
 use App\Services\Util;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Session;
 
-class AppController extends Controller {
+class AppController extends Controller
+{
     /**
      * Unlock the mailbox with password.
      */
-    public function unlock(Request $request) {
+    public function unlock(Request $request)
+    {
         $password = $request->password;
         if ($password !== config('app.settings.lock.password')) {
             Session::flash('error', __('Invalid Password'));
         }
         session(['password' => $password]);
+
         return redirect()->back();
     }
 
     /**
      * Load homepage or mailbox.
      */
-    public function load() {
+    public function load()
+    {
         $this->checkLinking();
         $homepage = config('app.settings.homepage');
+        $landingMode = Setting::pick('landing_mode') ?: 'public';
 
         if ($homepage == 0) {
             if (config('app.settings.disable_mailbox_slug')) {
                 return $this->app();
             }
+
+            // Public landing for guests: do not auto-create a mailbox; show
+            // the email-input landing page instead. Logged-in users always
+            // get the legacy auto-create + redirect flow. Admins can re-enable
+            // legacy guest behavior by switching landing_mode to "legacy".
+            if (! Auth::check() && $landingMode === 'public' && ! TMail::getEmail()) {
+                return view('frontend.themes.'.config('app.settings.theme').'.landing');
+            }
+
             TMail::getEmail(true);
+
             return redirect(Util::localizeRoute('mailbox'));
         }
 
         $page = Util::getTranslatedPage($homepage);
-        if (!$page) {
+        if (! $page) {
             abort(404);
         }
         $page = $this->setHeaders($page);
-        return view('frontend.themes.' . config('app.settings.theme') . '.app', compact('page'));
+
+        return view('frontend.themes.'.config('app.settings.theme').'.app', compact('page'));
     }
 
     /**
      * Show mailbox or redirect based on config.
+     *
+     * If `$email` is given, the email is looked up in the `emails` table:
+     *  - If active and exists, it is set as the current mailbox.
+     *  - If a logged-in user requests an email that does not exist yet AND
+     *    `enable_create_from_url` is on (legacy behavior), it falls back to
+     *    creating it. Guests can NEVER create emails via URL.
      */
-    public function mailbox($email = null) {
-        if ($email && config('app.settings.enable_create_from_url')) {
-            TMail::createCustomEmailFull($email);
-            return redirect(Util::localizeRoute('mailbox'));
+    public function mailbox(Request $request, $email = null)
+    {
+        if ($email !== null) {
+            $email = strtolower(trim($email));
+
+            if (! EmailManager::isValidEmail($email)) {
+                abort(404);
+            }
+
+            $key = 'inbox-access:'.$request->ip();
+            if (RateLimiter::tooManyAttempts($key, 60)) {
+                abort(429, __('Too many requests. Please slow down.'));
+            }
+            RateLimiter::hit($key, 60);
+
+            $row = EmailManager::findActive($email);
+
+            if ($row) {
+                $row->touchLastUsed();
+                TMail::ensureEmailInSession($email);
+
+                return redirect(Util::localizeRoute('mailbox'));
+            }
+
+            if (Auth::check() && config('app.settings.enable_create_from_url')) {
+                TMail::createCustomEmailFull($email);
+
+                return redirect(Util::localizeRoute('mailbox'));
+            }
+
+            abort(404);
         }
 
-        if (config('app.settings.homepage') && !TMail::getEmail()) {
+        if (config('app.settings.homepage') && ! TMail::getEmail()) {
             return redirect(Util::localizeRoute('home'));
         }
 
@@ -73,7 +125,8 @@ class AppController extends Controller {
     /**
      * Render the main app view.
      */
-    public function app() {
+    public function app()
+    {
         $theme = config('app.settings.theme');
 
         if ($theme === 'groot' && config('app.settings.theme_options.mailbox_page')) {
@@ -89,7 +142,8 @@ class AppController extends Controller {
     /**
      * Show a page by slug.
      */
-    public function page($slug = '') {
+    public function page($slug = '')
+    {
         $currentLocale = app()->getLocale();
         $defaultLocale = config('app.settings.language');
 
@@ -98,7 +152,7 @@ class AppController extends Controller {
             ->where('is_published', true)
             ->first();
 
-        if (!$page) {
+        if (! $page) {
             $languages = Setting::pick('languages');
             if (isset($languages[$slug]) && $languages[$slug]['is_active']) {
                 return $this->load();
@@ -124,13 +178,15 @@ class AppController extends Controller {
         if ($page->id === config('app.settings.homepage')) {
             return redirect(Util::localizeRoute('home'));
         }
-        return view('frontend.themes.' . config('app.settings.theme') . '.app', compact('page'));
+
+        return view('frontend.themes.'.config('app.settings.theme').'.app', compact('page'));
     }
 
     /**
      * Show a blog post by slug.
      */
-    public function blog($slug = '') {
+    public function blog($slug = '')
+    {
         $currentLocale = app()->getLocale();
         $defaultLocale = config('app.settings.language');
 
@@ -139,7 +195,7 @@ class AppController extends Controller {
             ->where('is_published', true)
             ->first();
 
-        if (!$post) {
+        if (! $post) {
             abort(404);
         }
 
@@ -158,27 +214,30 @@ class AppController extends Controller {
         }
 
         $post = $this->setHeaders($post);
-        return view('frontend.themes.' . config('app.settings.theme') . '.app', compact('post'));
+
+        return view('frontend.themes.'.config('app.settings.theme').'.app', compact('post'));
     }
 
     /**
      * Show category posts.
      */
-    public function category($slug) {
+    public function category($slug)
+    {
         $category = Category::where('slug', $slug)->first();
-        if (!$category) {
+        if (! $category) {
             abort(404);
         }
 
         $posts = Util::getBlogs($category->id);
 
-        return view('frontend.themes.' . config('app.settings.theme') . '.app', compact('category', 'posts'));
+        return view('frontend.themes.'.config('app.settings.theme').'.app', compact('category', 'posts'));
     }
 
     /**
      * Switch mailbox email.
      */
-    public function switch($email) {
+    public function switch($email)
+    {
         TMail::setEmail($email);
 
         if (config('app.settings.disable_mailbox_slug')) {
@@ -191,34 +250,41 @@ class AppController extends Controller {
     /**
      * Show user profile.
      */
-    public function profile() {
-        if (!Auth::check()) {
+    public function profile()
+    {
+        if (! Auth::check()) {
             return redirect(Util::localizeRoute('home'));
         }
         $profile = true;
-        return view('frontend.themes.' . config('app.settings.theme') . '.app', compact('profile'));
+
+        return view('frontend.themes.'.config('app.settings.theme').'.app', compact('profile'));
     }
 
     /**
      * Set locale for the session.
      */
-    public function locale(Request $request) {
+    public function locale(Request $request)
+    {
         $currentLocale = app()->getLocale();
         $newLocale = $request->input('locale', $currentLocale);
         if ($newLocale !== $currentLocale) {
-            $url = str_replace('/' . $currentLocale, '/' . $newLocale, url()->previous());
+            $url = str_replace('/'.$currentLocale, '/'.$newLocale, url()->previous());
             app()->setLocale($newLocale);
             session(['locale' => $newLocale]);
+
             return redirect($url);
         }
+
         return redirect()->back();
     }
 
     /**
      * Sitemap Generator
+     *
      * @since 2.4.0
      */
-    public function sitemap() {
+    public function sitemap()
+    {
         $pages = Page::select('id', 'slug', 'updated_at')
             ->where('is_published', true)
             ->get();
@@ -228,13 +294,15 @@ class AppController extends Controller {
             ->get();
 
         $contents = view('frontend.common.sitemap', compact('pages', 'posts'));
+
         return response($contents)->header('Content-Type', 'application/xml');
     }
 
     /**
      * Ensure symlinks for themes and storage exist.
      */
-    private function checkLinking() {
+    private function checkLinking()
+    {
         $symlinks = [
             'themes' => public_path('themes'),
             'storage' => public_path('storage'),
@@ -243,7 +311,7 @@ class AppController extends Controller {
         $needsLinking = false;
 
         foreach ($symlinks as $path) {
-            if (!file_exists($path) || !is_link($path)) {
+            if (! file_exists($path) || ! is_link($path)) {
                 if (file_exists($path)) {
                     is_dir($path) ? File::deleteDirectory($path) : File::delete($path);
                 }
@@ -259,8 +327,9 @@ class AppController extends Controller {
     /**
      * Set meta and header tags for a page and post.
      */
-    private function setHeaders($object) {
-        if (!$object) {
+    private function setHeaders($object)
+    {
+        if (! $object) {
             return $object;
         }
 
@@ -273,19 +342,20 @@ class AppController extends Controller {
         }
 
         foreach ($meta as $metaItem) {
-            if (!isset($metaItem['name']) || !isset($metaItem['content'])) {
+            if (! isset($metaItem['name']) || ! isset($metaItem['content'])) {
                 continue;
             }
 
             if ($metaItem['name'] === 'canonical') {
-                $header .= '<link rel="canonical" href="' . e($metaItem['content']) . '" />';
+                $header .= '<link rel="canonical" href="'.e($metaItem['content']).'" />';
             } elseif (str_contains($metaItem['name'], 'og:')) {
-                $header .= '<meta property="' . e($metaItem['name']) . '" content="' . e($metaItem['content']) . '" />';
+                $header .= '<meta property="'.e($metaItem['name']).'" content="'.e($metaItem['content']).'" />';
             } else {
-                $header .= '<meta name="' . e($metaItem['name']) . '" content="' . e($metaItem['content']) . '" />';
+                $header .= '<meta name="'.e($metaItem['name']).'" content="'.e($metaItem['content']).'" />';
             }
         }
         $object->header = $header;
+
         return $object;
     }
 }

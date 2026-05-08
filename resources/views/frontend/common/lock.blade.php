@@ -55,11 +55,11 @@
         {{-- Global CSS --}}
         {!! config("app.settings.global.css") !!}
     </head>
-    <body>
-        <div class="min-h-screen bg-primary">
+    <body class="neo-page-bg">
+        <div class="min-h-screen">
             <div class="container mx-auto">
-                <div class="flex h-screen">
-                    <div class="m-auto">
+                <div class="flex min-h-screen">
+                    <div class="m-auto w-full max-w-md px-4">
                         <div class="flex justify-center my-10">
                             @if (config("app.settings.logo") && Illuminate\Support\Facades\Storage::disk("public")->has(config("app.settings.logo")))
                                 <img class="max-w-40" src="{{ url("storage/" . config("app.settings.logo")) }}" alt="logo" />
@@ -69,25 +69,28 @@
                                 <img class="max-w-40" src="{{ asset("images/logo.png") }}" alt="logo" />
                             @endif
                         </div>
-                        <div class="bg-white rounded-2xl p-10 min-w-96 max-w-screen">
+                        <div class="neo-lock-card">
+                            <h1 class="text-xl font-black uppercase tracking-tight mb-4">{{ __("Locked") }}</h1>
                             @if (Session::has("error"))
-                                <div class="bg-red-50 w-full flex justify-between items-center rounded-lg px-4 py-3 text-sm mb-5">
+                                <div class="neo-alert bg-red-100 w-full flex justify-between items-center px-4 py-3 text-sm mb-5">
                                     <div class="flex justify-start items-center space-x-3">
-                                        <div class="text-red-400">
+                                        <div class="text-red-700">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
                                             </svg>
                                         </div>
-                                        <p class="text-sm text-red-400 font-medium">{{ Session::get("error") }}</p>
+                                        <p class="text-sm text-red-700 font-bold">{{ Session::get("error") }}</p>
                                     </div>
                                 </div>
                             @endif
 
-                            {!! config("app.settings.lock.text") !!}
-                            <form action="{{ route("unlock") }}" class="flex justify-center items-center gap-2" method="post">
+                            <div class="text-sm font-semibold text-gray-800 mb-4">
+                                {!! config("app.settings.lock.text") !!}
+                            </div>
+                            <form action="{{ route("unlock") }}" class="flex flex-col sm:flex-row sm:items-center gap-3" method="post">
                                 @csrf
-                                <input type="password" name="password" id="password" class="flex-1 w-full rounded-md px-4 py-2 text-sm outline-none border-1 border-gray-200 focus:border-gray-200 focus:shadow-none" placeholder="{{ __("Password") }}" />
-                                <button type="submit" class="rounded-md px-4 py-2 text-sm border-1 text-white" style="border-color: {{ config("app.settings.colors.secondary") }}; background-color: {{ config("app.settings.colors.secondary") }}">{{ __("Unlock") }}</button>
+                                <input type="password" name="password" id="password" class="neo-input flex-1 w-full" placeholder="{{ __("Password") }}" />
+                                <button type="submit" class="neo-btn neo-btn--default px-4 py-2 text-xs uppercase tracking-wide">{{ __("Unlock") }}</button>
                             </form>
                         </div>
                     </div>

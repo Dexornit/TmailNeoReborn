@@ -6,6 +6,195 @@
     display: none;
 }
 
+/* ═══════════════ NEOBRUTALISM GLOBAL TOKENS ═══════════════ */
+:root {
+    --neo-bg: #FDF6E3;
+    --neo-card-bg: #fff;
+    --neo-shadow: #000;
+    --neo-border: #000;
+    --neo-accent: #F7DC6F;
+    --neo-accent-2: #A3E4D7;
+    --neo-accent-3: #AED6F1;
+    --neo-accent-4: #F5CBA7;
+    --neo-accent-5: #F1948A;
+    --neo-accent-6: #D7BDE2;
+}
+
+html[data-mode="dark"] {
+    --neo-bg: #1A1A1A;
+    --neo-card-bg: #2A2A2A;
+    --neo-shadow: #fff;
+    --neo-border: #fff;
+}
+
+/* Card */
+.neo-card {
+    border: 3px solid var(--neo-border) !important;
+    box-shadow: 5px 5px 0 var(--neo-shadow) !important;
+    border-radius: 0 !important;
+    background-color: var(--neo-card-bg);
+}
+
+/* Button */
+.neo-btn {
+    border: 3px solid var(--neo-border) !important;
+    box-shadow: 3px 3px 0 var(--neo-shadow) !important;
+    border-radius: 0 !important;
+    font-weight: 800 !important;
+    transition: all 0.1s ease !important;
+}
+
+.neo-btn:active {
+    box-shadow: 0 0 0 var(--neo-shadow) !important;
+    transform: translate(3px, 3px);
+}
+
+.neo-btn--primary { background-color: var(--neo-accent-3); color: #000 !important; }
+.neo-btn--success { background-color: var(--neo-accent-2); color: #000 !important; }
+.neo-btn--info    { background-color: var(--neo-accent-3); color: #000 !important; }
+.neo-btn--warning { background-color: var(--neo-accent); color: #000 !important; }
+.neo-btn--error   { background-color: var(--neo-accent-5); color: #000 !important; }
+.neo-btn--default { background-color: var(--neo-accent); color: #000 !important; }
+
+.neo-btn--secondary,
+.neo-btn--secondary-default,
+.neo-btn--secondary-primary,
+.neo-btn--secondary-success,
+.neo-btn--secondary-info,
+.neo-btn--secondary-warning,
+.neo-btn--secondary-error {
+    background-color: #fff !important;
+    color: #000 !important;
+}
+
+.neo-btn--danger {
+    background-color: var(--neo-accent-5) !important;
+    color: #000 !important;
+}
+
+/* Input / select / textarea */
+.neo-input,
+.neo-select,
+.neo-textarea {
+    border: 3px solid var(--neo-border) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background-color: #fff;
+    font-weight: 600;
+    padding: 8px 12px;
+}
+
+.neo-input:focus,
+.neo-select:focus,
+.neo-textarea:focus {
+    box-shadow: 3px 3px 0 var(--neo-shadow) !important;
+    outline: none !important;
+}
+
+/* Toggle */
+.neo-toggle .neo-toggle-path {
+    border: 3px solid var(--neo-border) !important;
+    border-radius: 0 !important;
+    box-shadow: 2px 2px 0 var(--neo-shadow) !important;
+    background-color: #fff !important;
+}
+
+.neo-toggle .neo-toggle-circle {
+    border: 2px solid var(--neo-border) !important;
+    border-radius: 0 !important;
+    background-color: var(--neo-accent) !important;
+}
+
+.neo-toggle input:checked ~ .neo-toggle-path {
+    background-color: var(--neo-accent-2) !important;
+}
+
+/* Dialog modal surface */
+.neo-modal-surface {
+    border: 3px solid var(--neo-border) !important;
+    box-shadow: 5px 5px 0 var(--neo-shadow) !important;
+    border-radius: 0 !important;
+    background-color: var(--neo-card-bg) !important;
+}
+
+/* Backend page chrome */
+.neo-page-bg {
+    background-color: var(--neo-bg) !important;
+    background-image: radial-gradient(rgba(0, 0, 0, 0.08) 1px, transparent 1px);
+    background-size: 16px 16px;
+}
+
+.neo-section-header {
+    background-color: var(--neo-accent) !important;
+    border-bottom: 3px solid var(--neo-border) !important;
+    box-shadow: none !important;
+}
+
+.neo-footer-bar {
+    background-color: var(--neo-accent-6) !important;
+    border-top: 3px solid var(--neo-border) !important;
+    color: #000 !important;
+}
+
+.neo-footer-bar a {
+    color: #000 !important;
+}
+
+/* Auth shell */
+.neo-auth-shell {
+    background-color: var(--neo-bg);
+    min-height: 100vh;
+}
+
+.neo-auth-card {
+    border: 3px solid var(--neo-border);
+    box-shadow: 8px 8px 0 var(--neo-shadow);
+    background-color: var(--neo-card-bg);
+}
+
+/* Lock page */
+.neo-lock-card {
+    border: 3px solid var(--neo-border);
+    box-shadow: 8px 8px 0 var(--neo-shadow);
+    background-color: var(--neo-card-bg);
+    padding: 32px;
+}
+
+/* Alert / banner */
+.neo-alert {
+    border: 3px solid var(--neo-border) !important;
+    box-shadow: 4px 4px 0 var(--neo-shadow) !important;
+    border-radius: 0 !important;
+}
+
+/* Table-like rows in admin lists */
+.neo-row {
+    border-bottom: 2px dashed var(--neo-border);
+}
+
+.neo-row:last-child {
+    border-bottom: none;
+}
+
+.neo-pill {
+    border: 2px solid var(--neo-border);
+    box-shadow: 2px 2px 0 var(--neo-shadow);
+    background-color: #fff;
+    color: #000;
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 0;
+    display: inline-block;
+}
+
+.neo-pill--ok      { background-color: var(--neo-accent-2); }
+.neo-pill--warn    { background-color: var(--neo-accent-4); }
+.neo-pill--err     { background-color: var(--neo-accent-5); color: #000; }
+.neo-pill--info    { background-color: var(--neo-accent-3); }
+.neo-pill--accent  { background-color: var(--neo-accent); }
+
 .pause-spinner {
     animation-play-state: paused;
 }
