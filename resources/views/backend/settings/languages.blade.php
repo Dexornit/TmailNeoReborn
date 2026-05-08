@@ -114,7 +114,7 @@
             </x-slot>
 
             <x-slot name="content">
-                <div class="grid grid-cols-2 gap-3 sticky top-0 bg-white dark:bg-gray-800 pb-2 z-10">
+                <div class="grid grid-cols-2 gap-3 sticky top-0 pb-2 z-10" style="background-color: var(--neo-card-bg-soft);">
                     <h3>{{ __("English (en)") }}</h3>
                     <h3 class="text-right">{{ $state["languages"][$translations["language"]]["label"] ?? "" }} ({{ $translations["language"] }})</h3>
                 </div>
