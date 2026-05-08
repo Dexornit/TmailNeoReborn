@@ -3,7 +3,7 @@
         {{ $logo }}
     </div>
 
-    <div class="neo-auth-card w-full sm:max-w-md px-6 py-6 dark:bg-gray-800 overflow-hidden">
+    <div class="neo-auth-card w-full sm:max-w-md px-6 py-6 overflow-hidden">
         {{ $slot }}
     </div>
 </div>
