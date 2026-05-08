@@ -6,18 +6,21 @@
 ])
 
 @php
+    // Map alert types to the neobrutalism alert palette so the admin alerts
+    // pick up the bright cream/sage/yellow/sky/red tokens instead of the
+    // washed-out Tailwind defaults.
     $alertClasses = [
-        "success" => "bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400",
-        "error" => "bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400",
-        "warning" => "bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-400",
-        "info" => "bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-400",
+        "success" => "neo-alert neo-alert--ok",
+        "error" => "neo-alert neo-alert--err",
+        "warning" => "neo-alert neo-alert--warn",
+        "info" => "neo-alert neo-alert--info",
     ];
 
     $iconClasses = [
-        "success" => "text-green-400",
-        "error" => "text-red-400",
-        "warning" => "text-yellow-400",
-        "info" => "text-blue-400",
+        "success" => "text-black",
+        "error" => "text-black",
+        "warning" => "text-black",
+        "info" => "text-black",
     ];
 
     $icons = [

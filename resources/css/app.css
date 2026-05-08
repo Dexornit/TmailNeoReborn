@@ -7,23 +7,24 @@
 }
 
 /* ═══════════════ NEOBRUTALISM GLOBAL TOKENS ═══════════════
-   Light-only cream/peach palette. Dark mode is intentionally not
-   supported — keep contrast predictable across all surfaces. */
+   Light-only bright palette: cream + sage + yellow + sky blue + red.
+   Dark mode is intentionally not supported — keep contrast predictable
+   across all surfaces. */
 :root {
-    --neo-bg: #FBEFD9;           /* warm cream — page background */
-    --neo-bg-alt: #F4E2C2;       /* darker cream — header/footer band */
-    --neo-card-bg: #FFFBF2;      /* ivory white — cards */
-    --neo-shadow: #2B2118;       /* dark espresso — soft black for shadows */
-    --neo-border: #2B2118;       /* dark espresso — borders */
-    --neo-text: #2B2118;         /* primary text */
-    --neo-accent: #F4B886;       /* peach     — default / warning / star */
-    --neo-accent-2: #B7C9A8;     /* sage      — success / copy */
-    --neo-accent-3: #9CC1D9;     /* soft blue — info / primary / refresh */
-    --neo-accent-4: #F4B886;     /* peach     — accent / new (alias of accent) */
-    --neo-accent-5: #E08585;     /* coral red — error / delete */
-    --neo-accent-6: #F4E2C2;     /* cream-2   — footer / cookie */
-    --neo-muted: #F8E8CB;        /* tinted card hover */
-    --neo-divider: #E7D4B0;
+    --neo-bg: #FFFBF1;           /* cream — page background */
+    --neo-bg-alt: #FCF596;       /* yellow band — header / page heading */
+    --neo-card-bg: #FFFBF1;      /* cream — cards (matches page) */
+    --neo-shadow: #1F2937;       /* deep slate — shadows */
+    --neo-border: #1F2937;       /* deep slate — borders */
+    --neo-text: #1F2937;         /* deep slate — primary text */
+    --neo-accent: #FCF596;       /* yellow    — default / warning / star */
+    --neo-accent-2: #CADCAE;     /* sage      — success / copy / online */
+    --neo-accent-3: #80C4E9;     /* sky blue  — info / primary / refresh */
+    --neo-accent-4: #FCF596;     /* yellow    — accent / new (alias of accent) */
+    --neo-accent-5: #EB4C4C;     /* red       — error / delete */
+    --neo-accent-6: #FFFBF1;     /* cream-2   — footer / cookie */
+    --neo-muted: #FFF6D6;        /* tinted card hover */
+    --neo-divider: #F0E2A8;
     --neo-radius: 0;
 }
 
@@ -270,6 +271,21 @@
 .neo-mobile-menu {
     background-color: rgba(251, 239, 217, 0.98);
 }
+
+/* Admin top-nav: bright cream w/ thick border (replaces old dark-navy bar) */
+.neo-admin-nav {
+    background-color: var(--neo-bg);
+    color: var(--neo-text);
+}
+
+/* Dashboard stat cards — rotate accent colors so the dashboard feels bright. */
+.neo-stat { color: var(--neo-text) !important; }
+.neo-stat--sage   { background-color: var(--neo-accent-2) !important; }
+.neo-stat--blue   { background-color: var(--neo-accent-3) !important; }
+.neo-stat--yellow { background-color: var(--neo-accent) !important; }
+.neo-stat--red    { background-color: var(--neo-accent-5) !important; color: #fff !important; }
+.neo-stat--cream  { background-color: var(--neo-card-bg) !important; }
+.neo-stat--red .opacity-80 { opacity: 0.95; }
 
 /* Single-page mailbox bar — input + Open Inbox + Copy/Refresh */
 .neo-mailbox-bar { max-width: 720px; margin: 0 auto; }

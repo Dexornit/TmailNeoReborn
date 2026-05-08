@@ -40,10 +40,36 @@ class App extends Component
     public function syncEmail($email): void
     {
         $this->email = $email;
+        // When the active mailbox is cleared (logout, switch to empty input),
+        // wipe any previously fetched messages so the cached inbox doesn't
+        // bleed into the next session.
+        if (empty($email)) {
+            $this->messages = [];
+            $this->deleted = [];
+            $this->error = '';
+            $this->page = 1;
+            $this->hasMore = true;
+            $this->initial = true;
+        }
     }
 
     public function fetch($pageNumber = 1): void
     {
+        // Refuse to fetch when there's no active mailbox — otherwise the
+        // legacy code path would dial the IMAP server with an empty user
+        // and still return whatever's left in $this->messages from a
+        // previous session.
+        if (empty($this->email)) {
+            $this->messages = [];
+            $this->deleted = [];
+            $this->error = '';
+            $this->page = 1;
+            $this->hasMore = true;
+            $this->dispatch('stopLoader');
+            $this->initial = true;
+
+            return;
+        }
         /**
          * Optimasi vs versi asli:
          *

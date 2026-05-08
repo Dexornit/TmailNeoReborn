@@ -55,6 +55,10 @@ class Actions extends Component
         $this->emails = TMail::getEmails();
         $this->isGuest = ! Auth::check();
         $this->hasEmail = ! empty($this->email);
+        // Reflect the session email back into the input box so the user
+        // can see what they're connected to (and so an empty input always
+        // means an empty session).
+        $this->emailInput = $this->email ?? '';
         $this->canCreate = $this->guestCreateAllowed() || Auth::check();
         $this->canDelete = Auth::check();
         $this->publicDomains = Domain::activeDomainNames();

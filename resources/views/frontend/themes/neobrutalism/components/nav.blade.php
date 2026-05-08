@@ -41,7 +41,7 @@
                             <a href="{{ route("admin") }}" class="neo-btn neo-btn--danger py-1 px-3 text-xs">{{ __("Admin") }}</a>
                         @endif
 
-                        @if (config("app.settings.user_registration.enabled") && ! Auth::check())
+                        @if (! Auth::check())
                             <a href="{{ route("login") }}" class="neo-btn neo-btn--success py-1 px-3 text-xs">{{ __("Login") }}</a>
                         @endif
                     </div>
@@ -172,7 +172,7 @@
                             <a href="{{ route("admin") }}" target="_blank" class="neo-btn neo-btn--danger py-2 px-5 text-sm">{{ __("Admin") }}</a>
                         @endif
 
-                        @if (config("app.settings.user_registration.enabled") && ! Auth::check())
+                        @if (! Auth::check())
                             <a href="{{ route("login") }}" class="neo-btn neo-btn--success py-2 px-5 text-sm">{{ __("Login") }}</a>
                         @endif
                     </div>
