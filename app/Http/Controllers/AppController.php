@@ -40,19 +40,19 @@ class AppController extends Controller
     {
         $this->checkLinking();
         $homepage = config('app.settings.homepage');
-        $landingMode = Setting::pick('landing_mode') ?: 'public';
 
         if ($homepage == 0) {
             if (config('app.settings.disable_mailbox_slug')) {
                 return $this->app();
             }
 
-            // Public landing for guests: do not auto-create a mailbox; show
-            // the email-input landing page instead. Logged-in users always
-            // get the legacy auto-create + redirect flow. Admins can re-enable
-            // legacy guest behavior by switching landing_mode to "legacy".
-            if (! Auth::check() && $landingMode === 'public' && ! TMail::getEmail()) {
-                return view('frontend.themes.'.config('app.settings.theme').'.landing');
+            // Guests never auto-create. The unified app view renders an
+            // email-input form when no session email is set, and the
+            // read-only Copy/Refresh actions once the guest resolves an
+            // existing email. Logged-in users keep the legacy auto-create
+            // + redirect flow.
+            if (! Auth::check()) {
+                return $this->app();
             }
 
             TMail::getEmail(true);

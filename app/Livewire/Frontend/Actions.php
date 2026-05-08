@@ -12,6 +12,7 @@ use App\Services\Util;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Component;
 
 class Actions extends Component
@@ -36,6 +37,14 @@ class Actions extends Component
 
     public bool $canDelete = false;
 
+    public bool $isGuest = true;
+
+    public bool $hasEmail = false;
+
+    public string $emailInput = '';
+
+    public array $publicDomains = [];
+
     protected $listeners = ['syncEmail', 'checkReCaptcha3'];
 
     public function mount()
@@ -44,12 +53,44 @@ class Actions extends Component
         $this->memberDomains = Domain::getMemberOnlyDomains();
         $this->email = TMail::getEmail();
         $this->emails = TMail::getEmails();
+        $this->isGuest = ! Auth::check();
+        $this->hasEmail = ! empty($this->email);
         $this->canCreate = $this->guestCreateAllowed() || Auth::check();
         $this->canDelete = Auth::check();
+        $this->publicDomains = Domain::activeDomainNames();
         $this->validateDomainInEmail();
         if (intval(config('app.settings.default_domain')) && isset($this->domains[intval(config('app.settings.default_domain')) - 1])) {
             $this->domain = $this->domains[intval(config('app.settings.default_domain')) - 1];
         }
+    }
+
+    /**
+     * Guest-only entry point: look up an existing email by address and
+     * place it in the session. Never auto-creates new emails.
+     */
+    public function openInbox()
+    {
+        $email = strtolower(trim($this->emailInput));
+
+        if (! EmailManager::isValidEmail($email)) {
+            return $this->showAlert('error', __('Please enter a valid email address.'));
+        }
+
+        $key = 'inbox-access:'.request()->ip();
+        if (RateLimiter::tooManyAttempts($key, 60)) {
+            return $this->showAlert('error', __('Too many requests. Please slow down.'));
+        }
+        RateLimiter::hit($key, 60);
+
+        $row = EmailManager::findActive($email);
+        if (! $row) {
+            return $this->showAlert('error', __('Email not found. Ask the admin to create it first.'));
+        }
+
+        $row->touchLastUsed();
+        TMail::ensureEmailInSession($email);
+
+        return redirect(Util::localizeRoute('mailbox'));
     }
 
     public function syncEmail($email)
