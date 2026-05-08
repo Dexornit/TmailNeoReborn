@@ -3,37 +3,47 @@
 namespace App\Livewire\Frontend;
 
 use App\Models\Message;
-use Livewire\Component;
 use App\Services\TMail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Livewire\Component;
 
-class App extends Component {
+class App extends Component
+{
+    public $messages = [];
 
-    public $messages    = [];
-    public $deleted     = [];
-    public $error       = '';
+    public $deleted = [];
+
+    public $error = '';
+
     public $email;
+
     public $initial;
-    public $overflow    = false;
-    
+
+    public $overflow = false;
+
     // NEW: Pagination properties
-    public $page        = 1;
-    public $hasMore     = true;
+    public $page = 1;
+
+    public $hasMore = true;
+
     public $loadingMore = false;
 
     protected $listeners = ['fetchMessages' => 'fetch', 'syncEmail'];
 
-    public function mount(): void {
-        $this->email   = TMail::getEmail();
+    public function mount(): void
+    {
+        $this->email = TMail::getEmail();
         $this->initial = false;
     }
 
-    public function syncEmail($email): void {
+    public function syncEmail($email): void
+    {
         $this->email = $email;
     }
 
-    public function fetch($pageNumber = 1): void {
+    public function fetch($pageNumber = 1): void
+    {
         /**
          * Optimasi vs versi asli:
          *
@@ -54,17 +64,21 @@ class App extends Component {
          *  7. UNSEEN Filter: Fetch hanya email baru yang belum dibaca
          */
         try {
-            $count   = count($this->messages);
+            $count = count($this->messages);
             $useImap = config('app.settings.engine') !== 'delivery';
             $ccCheck = $useImap && config('app.settings.imap.cc_check', false);
-            
+
             // NEW: Pagination settings
             $paginationEnabled = config('tmail.enable_pagination', true);
-            $limit = (int)config('tmail.pagination_limit', 20);
+            $limit = (int) config('tmail.pagination_limit', 20);
             $offset = ($pageNumber - 1) * $limit;
-            
-            // NEW: UNSEEN filter - only fetch unread emails on first page
-            $unseenOnly = ($pageNumber === 1);
+
+            // UNSEEN filter is OFF by default. The previous behavior of
+            // filtering by UNSEEN on the first page caused already-seen
+            // messages to disappear on refresh because IMAP marks messages
+            // as SEEN after the first fetch. Admins can opt back in via
+            // config('tmail.fetch_unseen_only').
+            $unseenOnly = (bool) config('tmail.fetch_unseen_only', false);
 
             // ── Buka SATU koneksi, di-share ke to + cc ────────────────
             $connection = $useImap ? TMail::connectMailBox() : null;
@@ -88,7 +102,7 @@ class App extends Component {
                 $existingMsgs,
                 $unseenOnly,
                 $paginationEnabled ? $offset : 0,
-                $paginationEnabled ? $limit : (int)config('app.settings.fetch_messages_limit', 100)
+                $paginationEnabled ? $limit : (int) config('app.settings.fetch_messages_limit', 100)
             );
 
             // ── Fetch cc (opsional, koneksi sama) ─────────────────────
@@ -101,7 +115,7 @@ class App extends Component {
                     $existingMsgs,
                     $unseenOnly,
                     $paginationEnabled ? $offset : 0,
-                    $paginationEnabled ? $limit : (int)config('app.settings.fetch_messages_limit', 100)
+                    $paginationEnabled ? $limit : (int) config('app.settings.fetch_messages_limit', 100)
                 )
                 : ['data' => [], 'notifications' => [], 'has_deleted' => false];
 
@@ -114,11 +128,11 @@ class App extends Component {
                 }
             }
 
-            $this->deleted  = [];
+            $this->deleted = [];
 
             $newMessages = array_merge(
-                $toResult['data']          ?? [],
-                $ccResult['data']          ?? []
+                $toResult['data'] ?? [],
+                $ccResult['data'] ?? []
             );
 
             // NEW: Pagination - append or replace messages
@@ -169,7 +183,7 @@ class App extends Component {
                 $this->error = 'Not able to connect to Mail Server';
             }
 
-            Log::error('[TMail] fetch() gagal: ' . $e->getMessage(), [
+            Log::error('[TMail] fetch() gagal: '.$e->getMessage(), [
                 'email' => $this->email,
             ]);
         } finally {
@@ -185,7 +199,8 @@ class App extends Component {
         $this->initial = true;
     }
 
-    public function delete($messageId): void {
+    public function delete($messageId): void
+    {
         if (config('app.settings.engine') === 'delivery') {
             Message::find($messageId)?->delete();
         }
@@ -194,7 +209,7 @@ class App extends Component {
 
         foreach ($this->messages as $key => $message) {
             if ($message['id'] == $messageId) {
-                $this->rrmdir('./tmp/attachments/' . $messageId);
+                $this->rrmdir('./tmp/attachments/'.$messageId);
                 unset($this->messages[$key]);
                 break; // ID unik, tidak perlu lanjut loop
             }
@@ -205,8 +220,9 @@ class App extends Component {
      * Load more emails (pagination).
      * Called when user clicks "Load More" button or scrolls to bottom.
      */
-    public function loadMore(): void {
-        if (!$this->hasMore || $this->loadingMore) {
+    public function loadMore(): void
+    {
+        if (! $this->hasMore || $this->loadingMore) {
             return;
         }
 
@@ -218,11 +234,12 @@ class App extends Component {
     /**
      * Download attachment on-demand (lazy load).
      * Called when user clicks download button on attachment.
-     * 
-     * @param int    $messageNumber IMAP message number
-     * @param string $filename      Attachment filename
+     *
+     * @param  int  $messageNumber  IMAP message number
+     * @param  string  $filename  Attachment filename
      */
-    public function downloadAttachment(int $messageNumber, string $filename): void {
+    public function downloadAttachment(int $messageNumber, string $filename): void
+    {
         try {
             $result = TMail::downloadAttachment($messageNumber, $filename);
 
@@ -244,44 +261,50 @@ class App extends Component {
                 $this->dispatch('attachmentDownloaded', [
                     'messageId' => $messageNumber,
                     'filename' => $filename,
-                    'url' => $result['url']
+                    'url' => $result['url'],
                 ]);
             } else {
                 // Emit error event
                 $this->dispatch('attachmentDownloadFailed', [
                     'messageId' => $messageNumber,
                     'filename' => $filename,
-                    'error' => $result['error']
+                    'error' => $result['error'],
                 ]);
             }
         } catch (\Exception $e) {
             Log::error('[TMail] Download attachment failed in Livewire', [
                 'message_number' => $messageNumber,
                 'filename' => $filename,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             $this->dispatch('attachmentDownloadFailed', [
                 'messageId' => $messageNumber,
                 'filename' => $filename,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
         }
     }
 
-    public function render() {
-        return view('frontend.themes.' . config('app.settings.theme') . '.components.app');
+    public function render()
+    {
+        return view('frontend.themes.'.config('app.settings.theme').'.components.app');
     }
 
-    private function rrmdir($dir): void {
-        if (!is_dir($dir)) return;
+    private function rrmdir($dir): void
+    {
+        if (! is_dir($dir)) {
+            return;
+        }
 
         $objects = scandir($dir);
         foreach ($objects as $object) {
-            if ($object === '.' || $object === '..') continue;
+            if ($object === '.' || $object === '..') {
+                continue;
+            }
 
-            $path = $dir . DIRECTORY_SEPARATOR . $object;
-            if (is_dir($path) && !is_link($dir . '/' . $object)) {
+            $path = $dir.DIRECTORY_SEPARATOR.$object;
+            if (is_dir($path) && ! is_link($dir.'/'.$object)) {
                 $this->rrmdir($path);
             } else {
                 unlink($path);
