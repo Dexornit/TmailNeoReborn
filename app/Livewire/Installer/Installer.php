@@ -5,6 +5,7 @@ namespace App\Livewire\Installer;
 use App\Models\Domain;
 use Exception;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
@@ -48,6 +49,7 @@ class Installer extends Component {
     public $current = 0;
     public $error = '';
     public $success = '';
+    public $healthChecks = [];
 
     protected $listeners = ['runMigrations'];
 
@@ -175,22 +177,121 @@ class Installer extends Component {
             );
             if ($this->createAdminAccount()) {
                 $this->changeSessionDriver();
+                $this->finalizeInstallation();
                 file_put_contents(storage_path('installed'), 'TMail successfully installed on ' . date('Y/m/d h:i:sa'));
+                $this->healthChecks = $this->runHealthChecks();
                 $this->success = 'Installation Completed Successfully!';
                 $this->current = 4;
             }
         }
     }
 
+    /**
+     * Run final post-install Artisan commands so shared-hosting users
+     * never have to touch a terminal. All commands are PHP-only via Artisan::call().
+     */
+    private function finalizeInstallation() {
+        try {
+            Artisan::call('storage:link', ['--force' => true]);
+        } catch (\Throwable $e) {
+            Log::warning('storage:link failed: ' . $e->getMessage());
+        }
+        try {
+            Artisan::call('optimize:clear');
+        } catch (\Throwable $e) {
+            Log::warning('optimize:clear failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Verify the install actually worked. Each check returns ok|fail + a hint
+     * so users can self-diagnose before they ever ssh in.
+     */
+    private function runHealthChecks(): array {
+        $checks = [];
+
+        // 1. Migrations applied
+        try {
+            $count = DB::table('migrations')->count();
+            $checks[] = [
+                'name' => 'Database migrations applied',
+                'ok' => $count > 0,
+                'detail' => $count > 0 ? $count . ' migrations recorded' : 'migrations table is empty'
+            ];
+        } catch (\Throwable $e) {
+            $checks[] = ['name' => 'Database migrations applied', 'ok' => false, 'detail' => $e->getMessage()];
+        }
+
+        // 2. Installed flag file present
+        $installedFlag = storage_path('installed');
+        $checks[] = [
+            'name' => 'Install flag file written',
+            'ok' => is_readable($installedFlag),
+            'detail' => $installedFlag
+        ];
+
+        // 3. Storage directories writable (logs, framework, app)
+        $storageDirs = [
+            storage_path('logs'),
+            storage_path('framework'),
+            storage_path('app'),
+        ];
+        $unwritable = array_filter($storageDirs, fn($d) => !is_writable($d));
+        $checks[] = [
+            'name' => 'Storage directories writable',
+            'ok' => empty($unwritable),
+            'detail' => empty($unwritable) ? 'logs, framework, app all writable' : 'Not writable: ' . implode(', ', $unwritable)
+        ];
+
+        // 4. Pre-built front-end assets present (public/build/manifest.json)
+        $manifest = public_path('build/manifest.json');
+        $checks[] = [
+            'name' => 'Front-end assets present (public/build)',
+            'ok' => is_readable($manifest),
+            'detail' => is_readable($manifest) ? 'manifest.json readable' : 'Missing ' . $manifest
+        ];
+
+        // 5. Public storage symlink resolved (best-effort, non-fatal)
+        $publicStorage = public_path('storage');
+        $checks[] = [
+            'name' => 'public/storage symlink',
+            'ok' => file_exists($publicStorage),
+            'detail' => file_exists($publicStorage) ? 'symlink resolved' : 'symlink missing (re-run installer or click Maintenance)'
+        ];
+
+        // 6. Admin account created
+        try {
+            $admins = User::where('role', 7)->count();
+            $checks[] = [
+                'name' => 'Admin account created',
+                'ok' => $admins > 0,
+                'detail' => $admins . ' admin user(s)'
+            ];
+        } catch (\Throwable $e) {
+            $checks[] = ['name' => 'Admin account created', 'ok' => false, 'detail' => $e->getMessage()];
+        }
+
+        return $checks;
+    }
+
     public function runMigrations() {
         try {
-            // Use migrate instead of migrate:refresh for installation
+            // Clear config/cache so the .env values just written take effect
+            Artisan::call('config:clear');
+            Artisan::call('cache:clear');
+
             $exitCode = Artisan::call('migrate:fresh', ['--force' => true]);
             if ($exitCode === 0) {
+                // Clear views/route caches once schema is fresh
+                try {
+                    Artisan::call('optimize:clear');
+                } catch (\Throwable $e) {
+                    Log::warning('optimize:clear failed: ' . $e->getMessage());
+                }
                 $this->success = 'Database Connection Successful. Please proceed with further details.';
                 $this->current = 1;
             } else {
-                $this->error = 'Migration failed with exit code: ' . $exitCode;
+                $this->error = 'Migration failed with exit code: ' . $exitCode . '. Output: ' . trim(Artisan::output());
             }
         } catch (\Exception $e) {
             Log::error('Migration error: ' . $e->getMessage());

@@ -52,6 +52,7 @@ Route::middleware(['verify.install', 'handle.language'])->group(function () {
             Route::get('/updates', function () {
                 return view('backend.updates');
             })->name('updates');
+            Route::get('/maintenance', \App\Livewire\Backend\Maintenance::class)->name('maintenance');
             /** Tinymce Image Upload Route */
             Route::post('/upload/tinymce/image', [UploadController::class, 'tinymceImage']);
         });

@@ -207,6 +207,34 @@
     @endif
 
     @if ($current === 4)
+        @if (!empty($healthChecks))
+            <div class="col-span-6">
+                <h3 class="text-xl font-semibold mb-3">{{ __("Post-install Health Check") }}</h3>
+                <div class="border-2 border-black rounded-md overflow-hidden">
+                    @foreach ($healthChecks as $check)
+                        <div class="flex items-start gap-3 p-3 border-b last:border-b-0 border-black/20 {{ $check['ok'] ? 'bg-green-50' : 'bg-red-50' }}">
+                            <div class="mt-1 text-lg">
+                                @if ($check['ok'])
+                                    <span class="text-green-600">&#10003;</span>
+                                @else
+                                    <span class="text-red-600">&#10007;</span>
+                                @endif
+                            </div>
+                            <div class="flex-1">
+                                <div class="font-semibold text-sm">{{ $check['name'] }}</div>
+                                <div class="text-xs text-gray-600 mt-0.5">{{ $check['detail'] }}</div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+                @php $allOk = collect($healthChecks)->every(fn($c) => $c['ok']); @endphp
+                @if (!$allOk)
+                    <p class="text-xs text-red-700 mt-2">
+                        {{ __("Some checks did not pass. Most issues resolve by clicking the maintenance tool in the admin panel after login (Settings &rarr; Maintenance), or by adjusting file permissions on storage/ and public/build/.") }}
+                    </p>
+                @endif
+            </div>
+        @endif
         <div class="col-span-6">
             <a class="w-full block text-center bg-indigo-700 form-input rounded-md text-white border-0 text-sm" href="{{ route("login") }}">
                 <span class="mr-3 font-bold">{{ __("Visit TMail - Admin Panel") }}</span>
