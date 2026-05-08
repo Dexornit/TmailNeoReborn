@@ -19,7 +19,7 @@
                         spellcheck="false"
                         wire:model.defer="emailInput"
                         class="neo-input neo-mailbox-input flex-1"
-                        placeholder="username@{{ $publicDomains[0] ?? 'example.com' }}"
+                        placeholder="{{ __('Masukkan email') }}"
                         required
                     />
                     <button type="submit" class="neo-btn neo-btn--success px-6 whitespace-nowrap">
