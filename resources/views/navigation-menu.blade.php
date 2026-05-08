@@ -73,6 +73,9 @@
                                 <x-dropdown-link href="{{ route('updates') }}">
                                     {{ __("App Updates") }}
                                 </x-dropdown-link>
+                                <x-dropdown-link href="{{ route('maintenance') }}">
+                                    {{ __("Maintenance") }}
+                                </x-dropdown-link>
 
                                 <div class="border-t border-gray-100 dark:border-gray-700 my-1"></div>
                             @endif
@@ -170,6 +173,9 @@
                     </x-responsive-nav-link>
                     <x-responsive-nav-link href="{{ route('updates') }}" :active="request()->routeIs('updates')">
                         {{ __("App Updates") }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link href="{{ route('maintenance') }}" :active="request()->routeIs('maintenance')">
+                        {{ __("Maintenance") }}
                     </x-responsive-nav-link>
                 @endif
 
